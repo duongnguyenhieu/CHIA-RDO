@@ -1,0 +1,17 @@
+# Reproducibly fetched third-party source and build products.
+software/third_party/
+build/
+datasets/generated/
+
+# Generated experiment artifacts. Keep directory sentinels tracked.
+results/**/*
+!results/**/.gitkeep
+logs/**/*
+!logs/**/.gitkeep
+figures/**/*
+!figures/**/.gitkeep
+
+# Python artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/

@@ -1,0 +1,177 @@
+{
+  "baseline_result": "results/baseline/tiny64-all-intra-full-rdo-qp32-faed5f414b11/result.json",
+  "baseline_trace": "results/baseline/tiny64-all-intra-full-rdo-qp32-faed5f414b11/intra-rdo.jsonl",
+  "cloud_cost_usd": 0.0,
+  "created_utc": "2026-09-08T10:51:52.979944Z",
+  "limitations": [
+    "HHI_RQT_INTRA_SPEEDUP remains enabled; candidate-loop coverage is exhaustive but transform-tree refinement follows stock HM.",
+    "Trace events describe evaluated search alternatives, not only coding-tree units committed to the final bitstream.",
+    "The 64x64 synthetic sequence is a smoke test, not research-quality evidence."
+  ],
+  "repeat_metrics": {
+    "annex_b_kbps": 195.06,
+    "bitstream_bytes": 3251,
+    "encoded_frames": 4,
+    "hm_cpu_time_seconds": 0.462,
+    "hm_summary_kbps": 195.06,
+    "pictures": [
+      {
+        "bits": 6184,
+        "poc": 0,
+        "psnr_u_db": 38.1721,
+        "psnr_v_db": 37.3133,
+        "psnr_y_db": 31.1321,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 6384,
+        "poc": 1,
+        "psnr_u_db": 37.7876,
+        "psnr_v_db": 37.076,
+        "psnr_y_db": 31.2778,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 6688,
+        "poc": 2,
+        "psnr_u_db": 37.0192,
+        "psnr_v_db": 37.2901,
+        "psnr_y_db": 31.252,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 6752,
+        "poc": 3,
+        "psnr_u_db": 36.5359,
+        "psnr_v_db": 37.1917,
+        "psnr_y_db": 31.4668,
+        "qp": 32,
+        "slice_type": "I"
+      }
+    ],
+    "psnr_u_db": 37.3787,
+    "psnr_v_db": 37.2178,
+    "psnr_y_db": 31.2822,
+    "psnr_yuv_db": 32.5269
+  },
+  "repeat_trace_summary": {
+    "average_k": 35.0,
+    "candidate_modes": 35,
+    "maximum_k": 35,
+    "minimum_k": 35,
+    "rdo_evaluations": 47740,
+    "rqt_refinement_evaluations": 1364,
+    "search_calls": 1364
+  },
+  "schema_version": "chia-rdo.phase1-quality-gate.v1",
+  "status": "PASS",
+  "tests": [
+    {
+      "actual": "4 unit tests passed",
+      "evidence_path": "results/quality_gate/20260908T105151Z",
+      "expected": "Tests pass and repeated bitstream/reconstruction/trace hashes match the recorded baseline.",
+      "method": "Run the test suite, then repeat exhaustive encode and compare immutable hashes.",
+      "status": "PASS",
+      "test": "HM baseline reproducibility"
+    },
+    {
+      "actual": "all 1364 rankings match stable rough-cost order and cover modes 0..34",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "Every search call covers all 35 modes exactly once.",
+      "method": "Validate every ranked_modes vector as a permutation of HEVC luma modes 0..34.",
+      "status": "PASS",
+      "test": "Exhaustive mode coverage"
+    },
+    {
+      "actual": "1344/1364 rows have mode-dependent SATD; all rows satisfy rough-cost identity",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "All feature vectors satisfy the HM rough-cost identity; non-boundary content has mode variation.",
+      "method": "Check nonnegative SATD and rough_cost = SATD + mode_bits * sqrt(lambda) per search call.",
+      "status": "PASS",
+      "test": "SATD telemetry correctness"
+    },
+    {
+      "actual": "all 1364 rankings match stable rough-cost order and cover modes 0..34",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "All recorded rankings exactly match reconstructed stable order.",
+      "method": "Reconstruct stable ordering from rough_cost_by_mode and compare every rank.",
+      "status": "PASS",
+      "test": "Candidate ranking telemetry correctness"
+    },
+    {
+      "actual": "all 1364 RD vectors are finite; each recorded winner is a tested candidate",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "All candidate RD vectors and winners satisfy invariants.",
+      "method": "Check finite/nonnegative costs, candidate membership, and winner cost invariant.",
+      "status": "PASS",
+      "test": "RD-cost telemetry correctness"
+    },
+    {
+      "actual": "47740 = 1364 * 35",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "RDO evaluations equal search_calls * 35.",
+      "method": "Sum per-event candidate evaluations and compare with event_count * 35.",
+      "status": "PASS",
+      "test": "RDO count consistency"
+    },
+    {
+      "actual": "1364 refinements for 1364 calls",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "Exactly one winner refinement is recorded per search call.",
+      "method": "Check each event's refinement counter under stock HHI_RQT_INTRA_SPEEDUP behavior.",
+      "status": "PASS",
+      "test": "RQT refinement count consistency"
+    },
+    {
+      "actual": "9695e6606861cc58de4398bfe70b4b894010ea6a377a8c7adf64db3f9752d606",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-decoded.yuv",
+      "expected": "Encoder reconstruction and decoder output hashes are identical.",
+      "method": "Decode the repeated bitstream with HM decoder and compare SHA-256.",
+      "status": "PASS",
+      "test": "Encoder/decoder reconstruction equality"
+    },
+    {
+      "actual": "68de30e7f7ca39f8df9fb412a3c38f31b54aadc063791876525ea94a700d4a45",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-exhaustive.bin",
+      "expected": "68de30e7f7ca39f8df9fb412a3c38f31b54aadc063791876525ea94a700d4a45",
+      "method": "Compare repeated encode SHA-256 with the previously recorded baseline.",
+      "status": "PASS",
+      "test": "Deterministic exhaustive bitstream"
+    },
+    {
+      "actual": "56f12bb400649ea148f2bae06cbf63ea4eb31f915c34dd60fdef2dd761cca7fd",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-exhaustive.log",
+      "expected": "Repeated parser output and JSONL trace are byte-identical.",
+      "method": "Parse the same log twice and compare trace SHA-256 with the recorded baseline.",
+      "status": "PASS",
+      "test": "Deterministic telemetry parser and trace"
+    },
+    {
+      "actual": "all 1364 RD vectors are finite; each recorded winner is a tested candidate",
+      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "expected": "Every trace event identifies an executed candidate-loop winner; final coding-tree commitment remains out of scope.",
+      "method": "Require each winner to be in its executed list and final best cost not exceed first-pass minimum.",
+      "status": "PASS",
+      "test": "Trace corresponds to executed HM candidate decisions"
+    },
+    {
+      "actual": "af27f0269993d15d1e177965a6ea8571c8cdfbd2c9633c896151c8470ad48f4a",
+      "evidence_path": "results/quality_gate/20260908T105151Z",
+      "expected": "Bitstream, reconstruction, and parsed coding metrics are identical.",
+      "method": "Build pristine HM-16.20 and compare stock encode against patched HM with CHIA variables unset.",
+      "status": "PASS",
+      "test": "Instrumentation does not alter stock HM bitstream"
+    },
+    {
+      "actual": "128x128, 8 frames configuration available",
+      "evidence_path": "configs/nontrivial_local.json",
+      "expected": "A deterministic >64x64 multi-frame configuration is present and generator-compatible.",
+      "method": "Validate a reproducible configuration larger than the 64x64 smoke input.",
+      "status": "PASS",
+      "test": "Nontrivial local benchmark availability"
+    }
+  ]
+}

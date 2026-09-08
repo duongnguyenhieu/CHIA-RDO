@@ -1,0 +1,11 @@
+name: chia-rdo
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.21
+  - cmake=4.3.1
+  - ninja=1.13.2
+  - verilator=5.052
+  - pip
+  - pip:
+      - -r requirements.txt

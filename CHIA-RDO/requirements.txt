@@ -1,0 +1,2 @@
+# Install the checked-out CHIA source when invoked from CHIA-RDO.
+-e ..

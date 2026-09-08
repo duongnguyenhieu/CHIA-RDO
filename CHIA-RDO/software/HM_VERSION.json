@@ -1,0 +1,9 @@
+{
+  "name": "HM",
+  "repository": "https://vcgit.hhi.fraunhofer.de/jvet/HM.git",
+  "tag": "HM-16.20",
+  "tag_object": "29a53b8a61d2b4b8f04cb6279434b7d7bfd87de7",
+  "revision": "22178e370178133438c0339f57b3b3a29f112909",
+  "license_file": "COPYING",
+  "patch": "software/patches/hm-16.20-chia-rdo.patch"
+}

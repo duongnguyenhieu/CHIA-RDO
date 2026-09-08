@@ -1,0 +1,171 @@
+diff --git a/source/Lib/TLibEncoder/TEncSearch.cpp b/source/Lib/TLibEncoder/TEncSearch.cpp
+index c7acfd7..540dbad 100644
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -42,8 +42,38 @@
+ #include "TLibCommon/TComTU.h"
+ #include "TLibCommon/Debug.h"
+ #include <math.h>
++#include <cstdlib>
++#include <fstream>
++#include <iomanip>
+ #include <limits>
+ 
++static Bool chiaRdoExhaustiveEnabled()
++{
++  const char *value = std::getenv("CHIA_RDO_EXHAUSTIVE");
++  return value != NULL && std::string(value) == "1";
++}
++
++static std::ofstream *chiaRdoTraceStream()
++{
++  static Bool initialized = false;
++  static std::ofstream stream;
++
++  if (!initialized)
++  {
++    initialized = true;
++    const char *path = std::getenv("CHIA_RDO_TRACE");
++    if (path != NULL && path[0] != '\0')
++    {
++      stream.open(path, std::ios::out | std::ios::trunc);
++      if (!stream)
++      {
++        std::cerr << "CHIA-RDO: could not open trace file " << path << std::endl;
++      }
++    }
++  }
++  return stream.is_open() ? &stream : NULL;
++}
++
+ 
+ //! \ingroup TLibEncoder
+ //! \{
+@@ -2264,17 +2294,34 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+ 
+     //===== determine set of modes to be tested (using prediction signal only) =====
+     Int numModesAvailable     = 35; //total number of Intra modes
++    const Bool chiaExhaustive = chiaRdoExhaustiveEnabled();
+     UInt uiRdModeList[FAST_UDI_MAX_RDMODE_NUM];
+     Int numModesForFullRD = m_pcEncCfg->getFastUDIUseMPMEnabled()?g_aucIntraModeNumFast_UseMPM[ uiWidthBit ] : g_aucIntraModeNumFast_NotUseMPM[ uiWidthBit ];
++    Distortion chiaSatdByMode[FAST_UDI_MAX_RDMODE_NUM];
++    UInt chiaModeBitsByMode[FAST_UDI_MAX_RDMODE_NUM];
++    Double chiaRoughCostByMode[FAST_UDI_MAX_RDMODE_NUM];
++    Double chiaRdCostByRank[FAST_UDI_MAX_RDMODE_NUM];
++    UInt chiaRqtRefinementEvaluations = 0;
++    for (Int i = 0; i < numModesAvailable; i++)
++    {
++      chiaSatdByMode[i] = 0;
++      chiaModeBitsByMode[i] = 0;
++      chiaRoughCostByMode[i] = MAX_DOUBLE;
++      chiaRdCostByRank[i] = MAX_DOUBLE;
++    }
++    if (chiaExhaustive)
++    {
++      numModesForFullRD = numModesAvailable;
++    }
+ 
+     // this should always be true
+     assert (tuRecurseWithPU.ProcessComponentSection(COMPONENT_Y));
+     initIntraPatternChType( tuRecurseWithPU, COMPONENT_Y, true DEBUG_STRING_PASS_INTO(sTemp2) );
+ 
+-    Bool doFastSearch = (numModesForFullRD != numModesAvailable);
++    Bool doFastSearch = chiaExhaustive || (numModesForFullRD != numModesAvailable);
+     if (doFastSearch)
+     {
+-      assert(numModesForFullRD < numModesAvailable);
++      assert(numModesForFullRD <= numModesAvailable);
+ 
+       for( Int i=0; i < numModesForFullRD; i++ )
+       {
+@@ -2312,6 +2359,9 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+ 
+         Double cost      = (Double)uiSad + (Double)iModeBits * sqrtLambdaForFirstPass;
+ 
++        chiaSatdByMode[uiMode] = uiSad;
++        chiaModeBitsByMode[uiMode] = iModeBits;
++        chiaRoughCostByMode[uiMode] = cost;
+ #if DEBUG_INTRA_SEARCH_COSTS
+         std::cout << "1st pass mode " << uiMode << " SAD = " << uiSad << ", mode bits = " << iModeBits << ", cost = " << cost << "\n";
+ #endif
+@@ -2392,6 +2442,7 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+       xRecurIntraCodingLumaQT( pcOrgYuv, pcPredYuv, pcResiYuv, resiLumaPU, uiPUDistY, dPUCost, tuRecurseWithPU DEBUG_STRING_PASS_INTO(sMode) );
+ #endif
+ 
++      chiaRdCostByRank[uiMode] = dPUCost;
+ #if DEBUG_INTRA_SEARCH_COSTS
+       std::cout << "2nd pass [luma,chroma] mode [" << Int(pcCU->getIntraDir(CHANNEL_TYPE_LUMA, uiPartOffset)) << "," << Int(pcCU->getIntraDir(CHANNEL_TYPE_CHROMA, uiPartOffset)) << "] cost = " << dPUCost << "\n";
+ #endif
+@@ -2475,6 +2526,7 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+       Double     dPUCost   = 0.0;
+ 
+       xRecurIntraCodingLumaQT( pcOrgYuv, pcPredYuv, pcResiYuv, resiLumaPU, uiPUDistY, false, dPUCost, tuRecurseWithPU DEBUG_STRING_PASS_INTO(sModeTree));
++      chiaRqtRefinementEvaluations++;
+ 
+       // check r-d cost
+       if( dPUCost < dBestPUCost )
+@@ -2512,6 +2564,64 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+     } // Mode loop
+ #endif
+ 
++    std::ofstream *chiaTrace = chiaRdoTraceStream();
++    if (chiaTrace != NULL)
++    {
++      const TComRectangle &chiaPuRect = tuRecurseWithPU.getRect(COMPONENT_Y);
++      *chiaTrace << std::setprecision(17)
++                 << "{\"event\":\"intra_luma_rdo\""
++                 << ",\"poc\":" << pcCU->getSlice()->getPOC()
++                 << ",\"ctu_rs_addr\":" << pcCU->getCtuRsAddr()
++                 << ",\"cu_x\":" << pcCU->getCUPelX()
++                 << ",\"cu_y\":" << pcCU->getCUPelY()
++                 << ",\"cu_width\":" << Int(pcCU->getWidth(0))
++                 << ",\"cu_height\":" << Int(pcCU->getHeight(0))
++                 << ",\"cu_depth\":" << uiDepth
++                 << ",\"pu_part_offset\":" << uiPartOffset
++                 << ",\"pu_x\":" << (pcCU->getCUPelX() + chiaPuRect.x0)
++                 << ",\"pu_y\":" << (pcCU->getCUPelY() + chiaPuRect.y0)
++                 << ",\"pu_width\":" << chiaPuRect.width
++                 << ",\"pu_height\":" << chiaPuRect.height
++                 << ",\"qp\":" << Int(pcCU->getQP(uiPartOffset))
++                 << ",\"policy\":\"" << (chiaExhaustive ? "exhaustive" : "stock") << "\""
++                 << ",\"candidate_count\":" << numModesForFullRD
++                 << ",\"rdo_candidate_evaluations\":" << numModesForFullRD
++                 << ",\"rqt_refinement_evaluations\":" << chiaRqtRefinementEvaluations
++                 << ",\"ranked_modes\":[";
++      for (Int i = 0; i < numModesForFullRD; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << uiRdModeList[i];
++      }
++      *chiaTrace << "],\"satd_by_mode\":[";
++      for (Int i = 0; i < numModesAvailable; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaSatdByMode[i];
++      }
++      *chiaTrace << "],\"mode_bits_by_mode\":[";
++      for (Int i = 0; i < numModesAvailable; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaModeBitsByMode[i];
++      }
++      *chiaTrace << "],\"rough_cost_by_mode\":[";
++      for (Int i = 0; i < numModesAvailable; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaRoughCostByMode[i];
++      }
++      *chiaTrace << "],\"rd_cost_by_rank\":[";
++      for (Int i = 0; i < numModesForFullRD; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaRdCostByRank[i];
++      }
++      *chiaTrace << "],\"best_mode\":" << uiBestPUMode
++                 << ",\"best_distortion\":" << uiBestPUDistY
++                 << ",\"best_rd_cost\":" << dBestPUCost << "}\n";
++    }
++
+     DEBUG_STRING_APPEND(sDebug, sPU)
+ 
+     //--- update overall distortion ---
