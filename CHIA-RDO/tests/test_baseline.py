@@ -23,6 +23,12 @@ class SequenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             tiny_yuv420(width=63)
 
+    def test_larger_sequence_is_deterministic(self) -> None:
+        first = tiny_yuv420(128, 128, 8)
+        second = tiny_yuv420(128, 128, 8)
+        self.assertEqual(first, second)
+        self.assertEqual(len(first), 196608)
+
 
 class LogParserTests(unittest.TestCase):
     def test_parses_required_metrics(self) -> None:

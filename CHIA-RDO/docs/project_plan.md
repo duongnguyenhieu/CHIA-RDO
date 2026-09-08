@@ -39,8 +39,9 @@ Gate:
 
 ## Phase 1: Full-RDO HEVC Baseline
 
-Status: smoke baseline and instrumentation quality gate passed on 2026-09-08;
-larger local validation is the next required checkpoint.
+Status: smoke baseline, instrumentation quality gate, and deterministic
+128x128x8 local validation passed on 2026-09-08. The next required checkpoint
+is local/GCP parity.
 
 Acquire and pin a public HM release, document source provenance and license,
 build the encoder reproducibly, and add one small deterministic smoke sequence.

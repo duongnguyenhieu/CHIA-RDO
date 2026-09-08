@@ -163,8 +163,10 @@ def encoder_argv(config: dict[str, Any], input_path: Path, bitstream: Path, reco
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=ROOT / "configs" / "baseline_smoke.json")
-    parser.add_argument("--force", action="store_true")
+    parser.add_argument("--replicate", default="")
     args = parser.parse_args()
+    if args.replicate and not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]*", args.replicate):
+        raise RuntimeError("replicate must contain only letters, digits, underscores, or hyphens")
     config = json.loads(args.config.read_text(encoding="utf-8"))
     if config.get("policy") != "exhaustive":
         raise RuntimeError("Phase 1 baseline requires the exhaustive policy")
@@ -176,14 +178,17 @@ def main() -> None:
         json.dumps(config, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     experiment_id = f"{config['name']}-{config_digest[:12]}"
+    if args.replicate:
+        experiment_id += f"-{args.replicate}"
     output_dir = ROOT / "results" / "baseline" / experiment_id
     log_dir = ROOT / "logs" / "baseline" / experiment_id
     result_path = output_dir / "result.json"
-    if result_path.exists() and not args.force:
+    if result_path.exists():
         existing = json.loads(result_path.read_text(encoding="utf-8"))
         if existing.get("status") == "success":
             print(f"cache hit: {experiment_id}")
             return
+        raise RuntimeError(f"existing non-success result requires a new --replicate: {result_path}")
     output_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -192,7 +197,13 @@ def main() -> None:
     sequence_hash = write_tiny_sequence(
         input_path, sequence["width"], sequence["height"], sequence["frames"]
     )
-    if sequence_hash != TINY64_SHA256:
+    is_tiny64_fixture = (
+        sequence["width"] == 64
+        and sequence["height"] == 64
+        and sequence["frames"] == 4
+        and sequence["generator"] == "tiny-yuv-v1"
+    )
+    if is_tiny64_fixture and sequence_hash != TINY64_SHA256:
         raise RuntimeError(f"unexpected generated sequence hash: {sequence_hash}")
 
     base_env = dict(os.environ)
@@ -270,6 +281,7 @@ def main() -> None:
             "hm_cpu_time_seconds": metrics.pop("hm_cpu_time_seconds"),
             "cloud_backend": None,
             "cloud_cost_usd": 0.0,
+            "replicate": args.replicate or None,
         },
         "metrics": {**metrics, **trace_summary, "bd_rate_percent": None},
         "artifacts": {

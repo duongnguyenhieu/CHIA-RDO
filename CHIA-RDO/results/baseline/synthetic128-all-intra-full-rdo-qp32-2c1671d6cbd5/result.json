@@ -1,0 +1,196 @@
+{
+  "artifacts": {
+    "bitstream": "results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/measure.bin",
+    "bitstream_sha256": "1cb82870707b13c7395ab26a14af223ab2c8534a43291c1abaf3b25f44fd6f07",
+    "decoded": "results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/decoded.yuv",
+    "raw_log": "logs/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/measure.log",
+    "reconstruction": "results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/measure-recon.yuv",
+    "reconstruction_sha256": "af0ddea378a5ee1fc19babc8b689fd043a419ba80506a4c05fd453cf711b42ad",
+    "trace": "results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/intra-rdo.jsonl"
+  },
+  "configuration": {
+    "argv": [
+      "/home/duong-nguyen-hieu/chia/CHIA-RDO/software/third_party/HM/bin/TAppEncoderStatic",
+      "-c",
+      "/home/duong-nguyen-hieu/chia/CHIA-RDO/software/third_party/HM/cfg/encoder_intra_main.cfg",
+      "-i",
+      "/home/duong-nguyen-hieu/chia/CHIA-RDO/datasets/generated/synthetic-128x128-8f-yuv420p8.yuv",
+      "-b",
+      "/home/duong-nguyen-hieu/chia/CHIA-RDO/results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/measure.bin",
+      "-o",
+      "/home/duong-nguyen-hieu/chia/CHIA-RDO/results/baseline/synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5/measure-recon.yuv",
+      "-wdt",
+      "128",
+      "-hgt",
+      "128",
+      "-fr",
+      "30",
+      "-f",
+      "8",
+      "-q",
+      "32",
+      "--InputBitDepth=8",
+      "--InputBitDepthC=8",
+      "--InputChromaFormat=420",
+      "--ConformanceWindowMode=0",
+      "--RateControl=0",
+      "--AdaptiveQP=0",
+      "--FEN=0",
+      "--ECU=0",
+      "--FDM=0",
+      "--ESD=0",
+      "--TransformSkipFast=0",
+      "--FastUDIUseMPMEnabled=0"
+    ],
+    "frame_rate_hz": 30,
+    "name": "synthetic128-all-intra-full-rdo-qp32",
+    "policy": "exhaustive",
+    "qp": 32,
+    "schema_version": "chia-rdo.experiment-config.v1",
+    "sequence": {
+      "bit_depth": 8,
+      "chroma_format": "420",
+      "frames": 8,
+      "generator": "tiny-yuv-v1",
+      "height": 128,
+      "name": "synthetic-128x128-8f-yuv420p8",
+      "width": 128
+    }
+  },
+  "created_utc": "2026-09-08T10:57:02.619823Z",
+  "encoder": {
+    "binary_sha256": "2b73832be4a2905f9e53307ce65a6a891c6c3c92da0e68d6fbc88f4a0568845e",
+    "build_flags": "RELEASE_CPPFLAGS=-O3 -Wuninitialized -Wno-error",
+    "name": "HM",
+    "patch_sha256": "bfa1569c1dbb6eab132568d414a1370f007677057c3d7c130f8c32674a6d13e1",
+    "preset_sha256": "9298b709dfd9602a364d21d93318f8d3f410a1eb4dcce9658bcb5e76a74f862b",
+    "repository": "https://vcgit.hhi.fraunhofer.de/jvet/HM.git",
+    "revision": "22178e370178133438c0339f57b3b3a29f112909",
+    "tag": "HM-16.20",
+    "version": "16.20"
+  },
+  "execution": {
+    "cloud_backend": null,
+    "cloud_cost_usd": 0.0,
+    "hm_cpu_time_seconds": 1.862,
+    "host": "duong-nguyen-hieu-ThinkPad-T14p-Gen-2",
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "trace_wall_time_seconds": 2.54653277,
+    "wall_time_seconds": 1.866927438
+  },
+  "experiment_id": "synthetic128-all-intra-full-rdo-qp32-2c1671d6cbd5",
+  "git_commit": "028d8587facb80d9853317a9bd236f12ccab0759",
+  "git_worktree_dirty": true,
+  "metrics": {
+    "annex_b_kbps": 693.63,
+    "average_k": 35.0,
+    "bd_rate_percent": null,
+    "bitstream_bytes": 23121,
+    "candidate_modes": 35,
+    "encoded_frames": 8,
+    "hm_summary_kbps": 693.63,
+    "maximum_k": 35,
+    "minimum_k": 35,
+    "pictures": [
+      {
+        "bits": 22856,
+        "poc": 0,
+        "psnr_u_db": 38.2964,
+        "psnr_v_db": 37.9571,
+        "psnr_y_db": 31.3487,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 22600,
+        "poc": 1,
+        "psnr_u_db": 38.3697,
+        "psnr_v_db": 38.0762,
+        "psnr_y_db": 31.3294,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 23408,
+        "poc": 2,
+        "psnr_u_db": 37.8121,
+        "psnr_v_db": 37.6767,
+        "psnr_y_db": 31.3475,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 23584,
+        "poc": 3,
+        "psnr_u_db": 37.7606,
+        "psnr_v_db": 37.7464,
+        "psnr_y_db": 31.394,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 22824,
+        "poc": 4,
+        "psnr_u_db": 36.9943,
+        "psnr_v_db": 38.0784,
+        "psnr_y_db": 31.2021,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 22952,
+        "poc": 5,
+        "psnr_u_db": 37.8568,
+        "psnr_v_db": 38.0872,
+        "psnr_y_db": 31.2422,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 23336,
+        "poc": 6,
+        "psnr_u_db": 38.0331,
+        "psnr_v_db": 37.7295,
+        "psnr_y_db": 31.1972,
+        "qp": 32,
+        "slice_type": "I"
+      },
+      {
+        "bits": 23408,
+        "poc": 7,
+        "psnr_u_db": 38.5792,
+        "psnr_v_db": 38.0397,
+        "psnr_y_db": 31.2321,
+        "qp": 32,
+        "slice_type": "I"
+      }
+    ],
+    "psnr_u_db": 37.9628,
+    "psnr_v_db": 37.9239,
+    "psnr_y_db": 31.2867,
+    "psnr_yuv_db": 32.6004,
+    "rdo_evaluations": 381920,
+    "rqt_refinement_evaluations": 10912,
+    "search_calls": 10912
+  },
+  "policy": {
+    "candidate_modes": 35,
+    "exhaustive_intra_modes": true,
+    "hm_rqt_speedup_enabled": true,
+    "name": "exhaustive-full-rdo",
+    "qualification": "All 35 luma modes enter HM's candidate RD loop; stock HHI_RQT_INTRA_SPEEDUP remains enabled."
+  },
+  "schema_version": "chia-rdo.baseline.v1",
+  "sequence": {
+    "bit_depth": 8,
+    "bytes": 196608,
+    "chroma_format": "420",
+    "frames": 8,
+    "generator": "tiny-yuv-v1",
+    "height": 128,
+    "name": "synthetic-128x128-8f-yuv420p8",
+    "sha256": "2618be2f65b0245fa564aba97745a9771025249c2e06ae0080208b072904be67",
+    "width": 128
+  },
+  "status": "success"
+}
