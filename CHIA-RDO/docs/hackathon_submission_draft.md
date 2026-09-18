@@ -3,7 +3,7 @@
 **Authors:** Nguyen Hieu Duong and Duy Hieu Bui, Vietnam National University,
 24020497@vnu.edu.vn
 
-**Artifact:** <https://github.com/duongnguyenhieu/CHIA-RDO>, release `v1.0.0`
+**Artifact:** <https://github.com/duongnguyenhieu/CHIA-RDO>, release `chia-rdo-v1.0.0`
 
 ## Abstract
 
@@ -144,7 +144,7 @@ Within these limits, CHIA-RDO demonstrates an end-to-end, inspectable co-design 
 
 [3] ITU-T/ISO/IEC, “High Efficiency Video Coding Test Model HM-16.20.”
 
-[4] CHIA-RDO artifact, <https://github.com/duongnguyenhieu/CHIA-RDO>, release `v1.0.0`.
+[4] CHIA-RDO artifact, <https://github.com/duongnguyenhieu/CHIA-RDO>, release `chia-rdo-v1.0.0`.
 
 ## AI Assistance Acknowledgement
 

@@ -72,6 +72,6 @@ RTL regressions are designed for remote GCP execution in this project. Do not re
 ## Release Metadata
 
 - Public repository: <https://github.com/duongnguyenhieu/CHIA-RDO>
-- Release: `v1.0.0`
+- Release: `chia-rdo-v1.0.0`
 - License: `BSD-3-Clause` (see `LICENSE`); third-party HM source is fetched and not redistributed
 - Contact: Nguyen Hieu Duong and Duy Hieu Bui, `24020497@vnu.edu.vn`
