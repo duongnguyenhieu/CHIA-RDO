@@ -1,0 +1,53 @@
+{
+  "records": [
+    {
+      "build_id": "serial-p1-d2-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p1-d3-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p2-d2-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p2-d3-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p3-d3-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p4-d2-w31",
+      "status": "CACHE_HIT"
+    },
+    {
+      "build_id": "serial-p4-d3-w31",
+      "elapsed_seconds": 360.835084,
+      "ended_utc": "2026-09-13T05:17:28.636375Z",
+      "returncode": 0,
+      "started_utc": "2026-09-13T05:11:27.801291Z",
+      "status": "ROUTE_PASS"
+    },
+    {
+      "build_id": "serial-p6-d3-w31",
+      "elapsed_seconds": 458.614779,
+      "ended_utc": "2026-09-13T05:25:07.251876Z",
+      "returncode": 0,
+      "started_utc": "2026-09-13T05:17:28.637097Z",
+      "status": "ROUTE_PASS"
+    },
+    {
+      "build_id": "serial-p8-d2-w31",
+      "elapsed_seconds": 600.710331,
+      "ended_utc": "2026-09-13T05:35:07.962663Z",
+      "returncode": 0,
+      "started_utc": "2026-09-13T05:25:07.252332Z",
+      "status": "ROUTE_PASS"
+    }
+  ],
+  "schema_version": "chia-rdo.phase7b-vivado-run.v1"
+}

@@ -1,0 +1,250 @@
+--- a/source/Lib/TLibCommon/TComTrQuant.cpp
++++ b/source/Lib/TLibCommon/TComTrQuant.cpp
+@@ -125,6 +125,10 @@ QpParam::QpParam(const TComDataCU &cu, const ComponentID compID)
+ 
+ TComTrQuant::TComTrQuant()
+ {
++  m_chiaForward4x4Valid = false;
++  m_chiaDequant4x4Valid = false;
++  memset(m_chiaForward4x4, 0, sizeof(m_chiaForward4x4));
++  memset(m_chiaDequant4x4, 0, sizeof(m_chiaDequant4x4));
+   // allocate temporary buffers
+   m_plTempCoeff  = new TCoeff[ MAX_CU_SIZE*MAX_CU_SIZE ];
+ 
+@@ -1467,6 +1471,8 @@ Void TComTrQuant::transformNxN(       TComTU        & rTu,
+   const UInt uiOrgTrDepth   = rTu.GetTransformDepthRel();
+ 
+   uiAbsSum=0;
++  m_chiaForward4x4Valid = false;
++  m_chiaDequant4x4Valid = false;
+ 
+   RDPCMMode rdpcmMode = RDPCM_OFF;
+   rdpcmNxN( rTu, compID, pcResidual, uiStride, cQP, rpcCoeff, uiAbsSum, rdpcmMode );
+@@ -1510,6 +1516,12 @@ Void TComTrQuant::transformNxN(       TComTU        & rTu,
+         xT( channelBitDepth, rTu.useDST(compID), pcResidual, uiStride, m_plTempCoeff, uiWidth, uiHeight, pcCU->getSlice()->getSPS()->getMaxLog2TrDynamicRange(toChannelType(compID)) );
+       }
+ 
++      if (compID == COMPONENT_Y && uiWidth == 4 && uiHeight == 4 && pcCU->getTransformSkip(uiAbsPartIdx, compID) == 0)
++      {
++        memcpy(m_chiaForward4x4, m_plTempCoeff, sizeof(m_chiaForward4x4));
++        m_chiaForward4x4Valid = true;
++      }
++
+ #if DEBUG_TRANSFORM_AND_QUANTISE
+       std::cout << g_debugCounter << ": " << uiWidth << "x" << uiHeight << " channel " << compID << " TU between transform and quantiser\n";
+       printBlock(m_plTempCoeff, uiWidth, uiHeight, uiWidth);
+@@ -1607,6 +1619,12 @@ Void TComTrQuant::invTransformNxN(      TComTU        &rTu,
+ 
+     xDeQuant(rTu, pcCoeff, m_plTempCoeff, compID, cQP);
+ 
++    if (compID == COMPONENT_Y && uiWidth == 4 && uiHeight == 4 && pcCU->getTransformSkip(uiAbsPartIdx, compID) == 0)
++    {
++      memcpy(m_chiaDequant4x4, m_plTempCoeff, sizeof(m_chiaDequant4x4));
++      m_chiaDequant4x4Valid = true;
++    }
++
+ #if DEBUG_TRANSFORM_AND_QUANTISE
+     std::cout << g_debugCounter << ": " << uiWidth << "x" << uiHeight << " channel " << compID << " TU between dequantiser and inverse-transform\n";
+     printBlock(m_plTempCoeff, uiWidth, uiHeight, uiWidth);
+--- a/source/Lib/TLibCommon/TComTrQuant.h
++++ b/source/Lib/TLibCommon/TComTrQuant.h
+@@ -179,6 +179,10 @@ public:
+   Int* getDequantCoeff                  ( UInt list, Int qp, UInt size ) { return m_dequantCoef          [size][list][qp]; };  //!< get DeQuant Coefficent
+   Void setUseScalingList   ( Bool bUseScalingList){ m_scalingListEnabledFlag = bUseScalingList; };
+   Bool getUseScalingList   (const UInt width, const UInt height, const Bool isTransformSkip){ return m_scalingListEnabledFlag && (!isTransformSkip || ((width == 4) && (height == 4))); };
++  Bool getChiaForward4x4Valid() const { return m_chiaForward4x4Valid; }
++  Bool getChiaDequant4x4Valid() const { return m_chiaDequant4x4Valid; }
++  const TCoeff* getChiaForward4x4() const { return m_chiaForward4x4; }
++  const TCoeff* getChiaDequant4x4() const { return m_chiaDequant4x4; }
+   Void setFlatScalingList  (const Int maxLog2TrDynamicRange[MAX_NUM_CHANNEL_TYPE], const BitDepths &bitDepths);
+   Void xsetFlatScalingList ( UInt list, UInt size, Int qp);
+   Void xSetScalingListEnc  ( TComScalingList *scalingList, UInt list, UInt size, Int qp);
+@@ -222,6 +226,11 @@ protected:
+ #endif
+   Bool     m_useTransformSkipFast;
+ 
++  Bool     m_chiaForward4x4Valid;
++  Bool     m_chiaDequant4x4Valid;
++  TCoeff   m_chiaForward4x4[16];
++  TCoeff   m_chiaDequant4x4[16];
++
+   Bool     m_scalingListEnabledFlag;
+ 
+   Int      *m_quantCoef            [SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM][SCALING_LIST_REM_NUM]; ///< array of quantization matrix coefficient 4x4
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -241,6 +241,57 @@ static std::ofstream *chiaRdoTraceStream()
+   return stream.is_open() ? &stream : NULL;
+ }
+ 
++static std::ofstream *chiaFullRdoTraceStream()
++{
++  static Bool initialized = false;
++  static std::ofstream stream;
++  if (!initialized)
++  {
++    initialized = true;
++    const char *path = std::getenv("CHIA_FULL_RDO_TRACE");
++    if (path != NULL && path[0] != '\0') stream.open(path, std::ios::out | std::ios::trunc);
++  }
++  return stream.is_open() ? &stream : NULL;
++}
++
++static Int64 chiaFullRdoNextSampleId = 0;
++static Int64 chiaFullRdoLastSampleId = -1;
++
++static Void chiaWriteFullRdoArray(std::ofstream &stream, const Pel *values, UInt stride)
++{
++  stream << '[';
++  for (UInt y = 0; y < 4; y++) for (UInt x = 0; x < 4; x++)
++  {
++    if (x != 0 || y != 0) stream << ',';
++    stream << Int(values[y * stride + x]);
++  }
++  stream << ']';
++}
++
++static Void chiaWriteFullRdoCoeffArray(std::ofstream &stream, const TCoeff *values)
++{
++  stream << '[';
++  for (UInt i = 0; i < 16; i++)
++  {
++    if (i != 0) stream << ',';
++    stream << values[i];
++  }
++  stream << ']';
++}
++
++static Void chiaWriteFullRdoBits(UInt bits, Double lambda, Double cost)
++{
++  std::ofstream *stream = chiaFullRdoTraceStream();
++  if (stream != NULL && chiaFullRdoLastSampleId >= 0)
++  {
++    *stream << std::setprecision(17)
++            << "{\"event\":\"full_rdo_bits\",\"sample_id\":" << chiaFullRdoLastSampleId
++            << ",\"rate_bits\":" << bits << ",\"lambda\":" << lambda
++            << ",\"rd_cost\":" << cost << "}\n";
++    chiaFullRdoLastSampleId = -1;
++  }
++}
++
+ 
+ //! \ingroup TLibEncoder
+ //! \{
+@@ -1335,6 +1386,7 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+                                            ,Int         default0Save1Load2
+                                      )
+ {
++  chiaFullRdoLastSampleId = -1;
+   if (!rTu.ProcessComponentSection(compID))
+   {
+     return;
+@@ -1376,6 +1428,13 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+   const UInt           partsPerMinCU    = 1<<(2*(sps.getMaxTotalCUDepth() - sps.getLog2DiffMaxMinCodingBlockSize()));
+   const UInt           uiChCodedMode    = (uiChPredMode==DM_CHROMA_IDX && !bIsLuma) ? pcCU->getIntraDir(CHANNEL_TYPE_LUMA, getChromasCorrespondingPULumaIdx(uiAbsPartIdx, chFmt, partsPerMinCU)) : uiChPredMode;
+   const UInt           uiChFinalMode    = ((chFmt == CHROMA_422)       && !bIsLuma) ? g_chroma422IntraAngleMappingTable[uiChCodedMode] : uiChCodedMode;
++  std::ofstream *chiaFullRdoTrace = chiaFullRdoTraceStream();
++  const Bool chiaCaptureFullRdo = chiaFullRdoTrace != NULL && bIsLuma && uiWidth == 4 && uiHeight == 4
++                               && uiChFinalMode == DC_IDX && !useTransformSkip;
++  Pel chiaOriginal[16] = {0};
++  Pel chiaPrediction[16] = {0};
++  Pel chiaResidual[16] = {0};
++  Pel chiaReferences[9] = {0};
+ 
+   const Int            blkX                                 = g_auiRasterToPelX[ g_auiZscanToRaster[ uiAbsPartIdx ] ];
+   const Int            blkY                                 = g_auiRasterToPelY[ g_auiZscanToRaster[ uiAbsPartIdx ] ];
+@@ -1404,6 +1463,23 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+     //===== get prediction signal =====
+     predIntraAng( compID, uiChFinalMode, piOrg, uiStride, piPred, uiStride, rTu, bUseFilteredPredictions );
+ 
++    if (chiaCaptureFullRdo)
++    {
++      const Int sw = 2 * Int(uiWidth) + 1;
++      const Pel *base = getPredictorPtr(compID, bUseFilteredPredictions) + sw + 1;
++      chiaReferences[0] = base[-sw-1];
++      for (UInt i = 0; i < 4; i++)
++      {
++        chiaReferences[1+i] = base[Int(i)-sw];
++        chiaReferences[5+i] = base[Int(i)*sw-1];
++      }
++      for (UInt y = 0; y < 4; y++) for (UInt x = 0; x < 4; x++)
++      {
++        chiaOriginal[y*4+x] = piOrg[y*uiStride+x];
++        chiaPrediction[y*4+x] = piPred[y*uiStride+x];
++      }
++    }
++
+     // save prediction
+     if( default0Save1Load2 == 1 )
+     {
+@@ -1458,6 +1534,11 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+     }
+   }
+ 
++  if (chiaCaptureFullRdo)
++  {
++    for (UInt y = 0; y < 4; y++) for (UInt x = 0; x < 4; x++) chiaResidual[y*4+x] = piResi[y*uiStride+x];
++  }
++
+   if (pcCU->getSlice()->getPPS()->getPpsRangeExtension().getCrossComponentPredictionEnabledFlag())
+   {
+     if (bUseCrossCPrediction)
+@@ -1617,7 +1698,49 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+   }
+ 
+   //===== update distortion =====
+-  ruiDist += m_pcRdCost->getDistPart( bitDepth, piReco, uiStride, piOrg, uiStride, uiWidth, uiHeight, compID );
++  const Distortion chiaBlockDistortion = m_pcRdCost->getDistPart( bitDepth, piReco, uiStride, piOrg, uiStride, uiWidth, uiHeight, compID );
++  ruiDist += chiaBlockDistortion;
++  if (chiaCaptureFullRdo && m_pcTrQuant->getChiaForward4x4Valid())
++  {
++    const Int64 sampleId = chiaFullRdoNextSampleId++;
++    chiaFullRdoLastSampleId = sampleId;
++    *chiaFullRdoTrace << "{\"event\":\"full_rdo_stage\",\"sample_id\":" << sampleId
++                      << ",\"poc\":" << pcCU->getSlice()->getPOC()
++                      << ",\"ctu_rs_addr\":" << pcCU->getCtuRsAddr()
++                      << ",\"abs_part_idx\":" << uiAbsPartIdx
++                      << ",\"mode\":" << uiChFinalMode << ",\"width\":4,\"height\":4"
++                      << ",\"qp\":" << cQP.Qp << ",\"references\":[";
++    for (UInt i = 0; i < 9; i++)
++    {
++      if (i != 0) *chiaFullRdoTrace << ',';
++      *chiaFullRdoTrace << Int(chiaReferences[i]);
++    }
++    *chiaFullRdoTrace << "],\"original\":";
++    chiaWriteFullRdoArray(*chiaFullRdoTrace, chiaOriginal, 4);
++    *chiaFullRdoTrace << ",\"prediction\":";
++    chiaWriteFullRdoArray(*chiaFullRdoTrace, chiaPrediction, 4);
++    *chiaFullRdoTrace << ",\"residual\":";
++    chiaWriteFullRdoArray(*chiaFullRdoTrace, chiaResidual, 4);
++    *chiaFullRdoTrace << ",\"transform\":";
++    chiaWriteFullRdoCoeffArray(*chiaFullRdoTrace, m_pcTrQuant->getChiaForward4x4());
++    *chiaFullRdoTrace << ",\"quantized\":";
++    chiaWriteFullRdoCoeffArray(*chiaFullRdoTrace, pcCoeff);
++    *chiaFullRdoTrace << ",\"dequantized\":";
++    if (uiAbsSum > 0 && m_pcTrQuant->getChiaDequant4x4Valid())
++    {
++      chiaWriteFullRdoCoeffArray(*chiaFullRdoTrace, m_pcTrQuant->getChiaDequant4x4());
++    }
++    else
++    {
++      const TCoeff zeros[16] = {0};
++      chiaWriteFullRdoCoeffArray(*chiaFullRdoTrace, zeros);
++    }
++    *chiaFullRdoTrace << ",\"inverse_residual\":";
++    chiaWriteFullRdoArray(*chiaFullRdoTrace, piResi, uiStride);
++    *chiaFullRdoTrace << ",\"reconstruction\":";
++    chiaWriteFullRdoArray(*chiaFullRdoTrace, piReco, uiStride);
++    *chiaFullRdoTrace << ",\"distortion\":" << chiaBlockDistortion << "}\n";
++  }
+ }
+ 
+ 
+@@ -1813,6 +1936,7 @@ TEncSearch::xRecurIntraCodingLumaQT(TComYuv*    pcOrgYuv,
+       }
+ 
+       dSingleCost       = m_pcRdCost->calcRdCost( uiSingleBits, uiSingleDistLuma );
++      chiaWriteFullRdoBits(uiSingleBits, m_pcRdCost->getLambda(), dSingleCost);
+ 
+       if (pcCU->getSlice()->getPPS()->getPpsRangeExtension().getCrossComponentPredictionEnabledFlag())
+       {

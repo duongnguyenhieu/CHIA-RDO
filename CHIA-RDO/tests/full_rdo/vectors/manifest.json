@@ -1,0 +1,155 @@
+{
+  "created_utc": "2026-09-10T13:56:38.145702Z",
+  "flat_sha256": "c090d49c8dee23132fce585fc0e89ee7c397102b9db6c350647509f4bc1a08d5",
+  "hm_revision": "22178e370178133438c0339f57b3b3a29f112909",
+  "jsonl_sha256": "9e6f672aab3c0de8d880c30603c1ffa2fa2277876d102d395c48fd8e3031c940",
+  "profile": {
+    "bit_depth": 8,
+    "block": "4x4",
+    "component": "luma",
+    "modes": [
+      1
+    ],
+    "qps": [
+      22,
+      27,
+      32,
+      37
+    ],
+    "rdoq": false,
+    "scaling_lists": false,
+    "sign_data_hiding": false,
+    "transform_skip": false
+  },
+  "rate_scope": "exact HM xGetIntraBitsQT count supplied to RTL; CABAC estimator not implemented",
+  "schema_version": "chia-rdo.full-rdo-mvp-vectors.v1",
+  "software_oracle_validation": "exact match for every captured stage before vector emission",
+  "source_class_counts": {
+    "flat": 64,
+    "high-contrast": 64,
+    "tiny": 128
+  },
+  "sources": [
+    {
+      "bitstream_sha256": "b947867ca078ba4003e01a5b02330555116045f49be867abce7d89dd27877b9b",
+      "complete_pairs": 1153,
+      "name": "tiny",
+      "qp": 22,
+      "selected_pairs": 32,
+      "source_sha256": "1ba7c09220b0c0124db023bc5b1549fc8da68f70a8c7f4e51348f7d84a2b6a6a",
+      "trace_sha256": "ce6c2ec4f1fa53a035bc55f80afc5a30ed6a524ffd1c34d790f3a7922819f889"
+    },
+    {
+      "bitstream_sha256": "eb48c8830e36e3507d0920926d55ac7602edef3d3f9feaff690d30402212af09",
+      "complete_pairs": 1888,
+      "name": "flat",
+      "qp": 22,
+      "selected_pairs": 16,
+      "source_sha256": "e109c2ae5dbe128701ab3f12295da6db0e77e0522628961020cef86e7c472e02",
+      "trace_sha256": "fe21e6680c70fcd26869f98669142cdd689310843c87af47abbd53c110dae80c"
+    },
+    {
+      "bitstream_sha256": "a76971cec8a1e0b9700c22b4063be27207bf898ae29a220332136498a1a22c59",
+      "complete_pairs": 1024,
+      "name": "high-contrast",
+      "qp": 22,
+      "selected_pairs": 16,
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "fadc08c158a52b41c0b272d87d64f55adb2618bd3183f3da75be8bce416149eb"
+    },
+    {
+      "bitstream_sha256": "a9f3630f7fe8e8d3fca7dee9836ed6e791ab9aa5a4aaa95aac5cae4988cb4594",
+      "complete_pairs": 1208,
+      "name": "tiny",
+      "qp": 27,
+      "selected_pairs": 32,
+      "source_sha256": "1ba7c09220b0c0124db023bc5b1549fc8da68f70a8c7f4e51348f7d84a2b6a6a",
+      "trace_sha256": "f7db3e3379bafa27b3513bcaab45165bda20651f08c59aaf0986b2961052760b"
+    },
+    {
+      "bitstream_sha256": "7f0ffcb0fd45c8a6619cca8bd6281e1f0d92c3940c276d7343088c29faf24155",
+      "complete_pairs": 1891,
+      "name": "flat",
+      "qp": 27,
+      "selected_pairs": 16,
+      "source_sha256": "e109c2ae5dbe128701ab3f12295da6db0e77e0522628961020cef86e7c472e02",
+      "trace_sha256": "5c9fd9fb22dbdedb86b438d22d795690b21d9ea51a2e596c2ec39ef98b47fbdd"
+    },
+    {
+      "bitstream_sha256": "9b2ca9293ab59efb07bb94f61a336b189adb2c108ffae1ab4770ad6527678ba6",
+      "complete_pairs": 1056,
+      "name": "high-contrast",
+      "qp": 27,
+      "selected_pairs": 16,
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "8b411665646be56b0a6e5025974c87751ab8faf4e532e3e1adb1bfaef3505462"
+    },
+    {
+      "bitstream_sha256": "0c94203c1fd9abc61a04cdec37864df2b0ffcfe5c7b4f49c488e8c09c0914399",
+      "complete_pairs": 1248,
+      "name": "tiny",
+      "qp": 32,
+      "selected_pairs": 32,
+      "source_sha256": "1ba7c09220b0c0124db023bc5b1549fc8da68f70a8c7f4e51348f7d84a2b6a6a",
+      "trace_sha256": "b463966a90d1d37aa76a4f67a4450c3dad8dcf03e04198168b80cf1a5e8535c8"
+    },
+    {
+      "bitstream_sha256": "dd91922b4d691354f665644dc6c974717c0e7ac389e41901d20f3b9a0458af76",
+      "complete_pairs": 1891,
+      "name": "flat",
+      "qp": 32,
+      "selected_pairs": 16,
+      "source_sha256": "e109c2ae5dbe128701ab3f12295da6db0e77e0522628961020cef86e7c472e02",
+      "trace_sha256": "5114a1204ef0b6c698872dfeea64d3c7be54845fea71d1f870fdb0b54c286df4"
+    },
+    {
+      "bitstream_sha256": "60c596fb0636c5184697363fefec0edcf50d93aa80721f225f9de3bf2b345f42",
+      "complete_pairs": 1054,
+      "name": "high-contrast",
+      "qp": 32,
+      "selected_pairs": 16,
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "0ce236013cc41384bee3d88954ee738d2f5d5831a4f6452048e3f6740aa5a9bb"
+    },
+    {
+      "bitstream_sha256": "a5104efc56e69ac4729f6da52f5d2c5314bd255082a0c6888564ea60c71e39db",
+      "complete_pairs": 1284,
+      "name": "tiny",
+      "qp": 37,
+      "selected_pairs": 32,
+      "source_sha256": "1ba7c09220b0c0124db023bc5b1549fc8da68f70a8c7f4e51348f7d84a2b6a6a",
+      "trace_sha256": "f23ddc8aa78667ef63cd922188274f6217b8bb273457c6b562169550ce75d962"
+    },
+    {
+      "bitstream_sha256": "75d32cd8664e36a3e9f5e253da3d62a7ddadbb0906bdb003e41aa137613de90a",
+      "complete_pairs": 1893,
+      "name": "flat",
+      "qp": 37,
+      "selected_pairs": 16,
+      "source_sha256": "e109c2ae5dbe128701ab3f12295da6db0e77e0522628961020cef86e7c472e02",
+      "trace_sha256": "eca816084f45ada6d265456a3565339830294b8df2763e41a50cc25710b6cbb7"
+    },
+    {
+      "bitstream_sha256": "ba5140e3e18b98e3ca79efaa5a9ed48fed3df2bc114fead2e6d7755b694f07e0",
+      "complete_pairs": 1056,
+      "name": "high-contrast",
+      "qp": 37,
+      "selected_pairs": 16,
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "3855fa135af4b3e66ec1fa3e6930a3e637097cc92cc092807cf2be0329f7c34e"
+    }
+  ],
+  "stage_vector_counts": {
+    "dequantized": 256,
+    "distortion": 256,
+    "inverse_residual": 256,
+    "prediction": 256,
+    "quantized": 256,
+    "rd_cost": 256,
+    "reconstruction": 256,
+    "residual": 256,
+    "transform": 256
+  },
+  "vector_count": 256,
+  "vectors_per_qp": 64
+}

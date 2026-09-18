@@ -1,0 +1,41 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -1429,12 +1429,14 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+   const UInt           uiChCodedMode    = (uiChPredMode==DM_CHROMA_IDX && !bIsLuma) ? pcCU->getIntraDir(CHANNEL_TYPE_LUMA, getChromasCorrespondingPULumaIdx(uiAbsPartIdx, chFmt, partsPerMinCU)) : uiChPredMode;
+   const UInt           uiChFinalMode    = ((chFmt == CHROMA_422)       && !bIsLuma) ? g_chroma422IntraAngleMappingTable[uiChCodedMode] : uiChCodedMode;
+   std::ofstream *chiaFullRdoTrace = chiaFullRdoTraceStream();
++  const Bool chiaSupportedMode = uiChFinalMode == PLANAR_IDX || uiChFinalMode == DC_IDX
++                              || uiChFinalMode == HOR_IDX || uiChFinalMode == VER_IDX;
+   const Bool chiaCaptureFullRdo = chiaFullRdoTrace != NULL && bIsLuma && uiWidth == 4 && uiHeight == 4
+-                               && uiChFinalMode == DC_IDX && !useTransformSkip;
++                               && chiaSupportedMode && !useTransformSkip;
+   Pel chiaOriginal[16] = {0};
+   Pel chiaPrediction[16] = {0};
+   Pel chiaResidual[16] = {0};
+-  Pel chiaReferences[9] = {0};
++  Pel chiaReferences[17] = {0};
+ 
+   const Int            blkX                                 = g_auiRasterToPelX[ g_auiZscanToRaster[ uiAbsPartIdx ] ];
+   const Int            blkY                                 = g_auiRasterToPelY[ g_auiZscanToRaster[ uiAbsPartIdx ] ];
+@@ -1468,10 +1470,10 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+       const Int sw = 2 * Int(uiWidth) + 1;
+       const Pel *base = getPredictorPtr(compID, bUseFilteredPredictions) + sw + 1;
+       chiaReferences[0] = base[-sw-1];
+-      for (UInt i = 0; i < 4; i++)
++      for (UInt i = 0; i < 8; i++)
+       {
+         chiaReferences[1+i] = base[Int(i)-sw];
+-        chiaReferences[5+i] = base[Int(i)*sw-1];
++        chiaReferences[9+i] = base[Int(i)*sw-1];
+       }
+       for (UInt y = 0; y < 4; y++) for (UInt x = 0; x < 4; x++)
+       {
+@@ -1710,7 +1712,7 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+                       << ",\"abs_part_idx\":" << uiAbsPartIdx
+                       << ",\"mode\":" << uiChFinalMode << ",\"width\":4,\"height\":4"
+                       << ",\"qp\":" << cQP.Qp << ",\"references\":[";
+-    for (UInt i = 0; i < 9; i++)
++    for (UInt i = 0; i < 17; i++)
+     {
+       if (i != 0) *chiaFullRdoTrace << ',';
+       *chiaFullRdoTrace << Int(chiaReferences[i]);

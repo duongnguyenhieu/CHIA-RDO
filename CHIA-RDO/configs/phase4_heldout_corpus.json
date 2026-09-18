@@ -1,0 +1,51 @@
+{
+  "schema_version": "chia-rdo.phase4-heldout-corpus.v1",
+  "split": "phase4-held-out-no-tuning",
+  "declared_before_evaluation": true,
+  "qps": [22, 27, 32, 37],
+  "acceptance": {
+    "adaptive_threshold_aggregate_bd_rate_max_percent": 1.5,
+    "adaptive_threshold_per_workload_bd_rate_max_percent": 3.0,
+    "adaptive_threshold_aggregate_winner_retention_min": 0.85,
+    "adaptive_threshold_per_workload_winner_retention_min": 0.75,
+    "adaptive_threshold_rdo_reduction_must_be_positive": true
+  },
+  "workloads": [
+    {
+      "name": "phase4-smooth-edges-96x64-4f-yuv420p8",
+      "generator": "heldout-smooth-edges-v1",
+      "width": 96,
+      "height": 64,
+      "frames": 4,
+      "bit_depth": 8,
+      "chroma_format": "420",
+      "expected_sha256": "15a1ee719386dfd8546158b341394064c579789b395beb7375ec1fcd8d402904",
+      "frame_rate_hz": 30,
+      "content_class": "smooth regions, gradients, and moving hard edges"
+    },
+    {
+      "name": "phase4-repetitive-128x96-4f-yuv420p8",
+      "generator": "heldout-repetitive-v1",
+      "width": 128,
+      "height": 96,
+      "frames": 4,
+      "bit_depth": 8,
+      "chroma_format": "420",
+      "expected_sha256": "373baa225f9cfea1820df9cfbff0adaad50b30a2788ddf7995b27260a8373cc7",
+      "frame_rate_hz": 30,
+      "content_class": "checkerboards, narrow stripes, and repetitive chroma"
+    },
+    {
+      "name": "phase4-mixed-texture-192x128-4f-yuv420p8",
+      "generator": "heldout-mixed-texture-v1",
+      "width": 192,
+      "height": 128,
+      "frames": 4,
+      "bit_depth": 8,
+      "chroma_format": "420",
+      "expected_sha256": "8fe82a13f3b0a5e22e04db1f002c131d4af0514bb4e783c57e40a704d2a447bf",
+      "frame_rate_hz": 30,
+      "content_class": "deterministic high-frequency texture, gradients, and geometric regions"
+    }
+  ]
+}

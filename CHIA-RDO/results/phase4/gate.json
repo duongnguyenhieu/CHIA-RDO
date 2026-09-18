@@ -1,0 +1,26 @@
+{
+  "algorithm_freeze": "PASS",
+  "checks": {
+    "bd_rate_analysis": true,
+    "coding_metrics": true,
+    "failure_analysis": true,
+    "final_policy_inputs": true,
+    "frozen_policy_acceptance": true,
+    "hardware_cost_model": true,
+    "heldout_workloads": true,
+    "multi_qp_evaluation": true,
+    "no_standard_corpus_overclaim": true,
+    "pareto_analysis": true,
+    "phase3_evidence_preserved": true,
+    "phase3_reproducibility": true,
+    "required_policies": true,
+    "rtl_specification_only": true,
+    "unit_tests": true
+  },
+  "generalization": "LIMITED",
+  "rtl_readiness": "READY",
+  "schema_version": "chia-rdo.phase4-gate.v1",
+  "selected_policy": "adaptive_threshold",
+  "status": "PASS",
+  "unit_test_output": "test_hm_vectors_match_integer_model_at_every_stage (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_phase52_corpus_coverage (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_phase52_hm_candidates_and_winners_match_reference (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_phase53_all_mode_candidates_and_winners_match_reference (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_phase53_corpus_coverage (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_vector_corpus_covers_supported_profile_and_edges (full_rdo.test_model.FullRdoModelTest) ... ok\ntest_parses_required_metrics (test_baseline.LogParserTests) ... ok\ntest_rejects_non_intra_picture (test_baseline.LogParserTests) ... ok\ntest_adaptive_boundaries (test_baseline.PolicyTests) ... ok\ntest_adaptive_threshold_is_independent_of_gap_policy (test_baseline.PolicyTests) ... ok\ntest_bd_rate_identity_and_pareto_dominance (test_baseline.PolicyTests) ... ok\ntest_cycle_model_batch_boundaries_and_partial_state (test_baseline.PolicyTests) ... ok\ntest_fixed_k_bounds_are_rejected (test_baseline.PolicyTests) ... ok\ntest_fixed_supported_levels (test_baseline.PolicyTests) ... ok\ntest_full_policy_selects_exhaustive_path (test_baseline.PolicyTests) ... ok\ntest_hardware_fill_respects_batch_boundaries (test_baseline.PolicyTests) ... ok\ntest_hardware_v1_is_deterministic_and_p_sensitive (test_baseline.PolicyTests) ... ok\ntest_invalid_thresholds_are_rejected (test_baseline.PolicyTests) ... ok\ntest_relative_satd_definition_and_quantization (test_baseline.PolicyTests) ... ok\ntest_heldout_generators_are_deterministic_and_distinct (test_baseline.SequenceTests) ... ok\ntest_invalid_yuv420_dimensions_are_rejected (test_baseline.SequenceTests) ... ok\ntest_larger_sequence_is_deterministic (test_baseline.SequenceTests) ... ok\ntest_tiny_sequence_is_stable (test_baseline.SequenceTests) ... ok\ntest_below_reserve_stops_and_cautious_rejects_sweeps (test_cost_policy.CostPolicyTests) ... ok\ntest_budget_mode_worker_limits (test_cost_policy.CostPolicyTests) ... ok\ntest_unverified_billing_fails_closed (test_cost_policy.CostPolicyTests) ... ok\ntest_agent_consumes_history_and_avoids_completed_ids (test_phase6.Phase6AgentTests) ... ok\ntest_frozen_policy_cannot_be_redefined (test_phase6.Phase6AgentTests) ... ok\ntest_identity_is_canonical_and_stable (test_phase6.Phase6AgentTests) ... ok\ntest_model_error_requires_measured_pairs (test_phase6.Phase6AgentTests) ... ok\ntest_pareto_marks_dominated_history_without_deleting_it (test_phase6.Phase6AgentTests) ... ok\n\n----------------------------------------------------------------------\nRan 31 tests in 1.932s\n\nOK\n"
+}

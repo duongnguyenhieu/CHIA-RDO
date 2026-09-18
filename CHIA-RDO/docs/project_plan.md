@@ -40,8 +40,9 @@ Gate:
 ## Phase 1: Full-RDO HEVC Baseline
 
 Status: smoke baseline, instrumentation quality gate, and deterministic
-128x128x8 local validation passed on 2026-09-08. The next required checkpoint
-is local/GCP parity.
+128x128x8 local validation and exact local/GCP smoke parity passed on
+2026-09-08. GCP output bitstream, reconstruction, trace, and all coding metrics
+match the local reference; see `reports/local_gcp_parity.md`.
 
 Acquire and pin a public HM release, document source provenance and license,
 build the encoder reproducibly, and add one small deterministic smoke sequence.
@@ -66,6 +67,10 @@ encode that emits results/baseline/<experiment-id>.json.
 
 ## Phase 2: Prior-Art-Inspired Adaptive-K Baselines
 
+Status: complete for two independently defined inspired policies and the frozen
+Adaptive-K v0 baseline. Matched QP 22/27/32/37 curves are available for two
+deterministic synthetic workloads; no exact paper-reproduction claim is made.
+
 Implement two independently written policies behind one candidate-selection
 interface: an adaptive threshold policy inspired by Chung/Yim and a relative
 SATD policy inspired by Gwon/Choi. Preserve citations and avoid copying source.
@@ -78,6 +83,11 @@ Gate:
 - BD-rate is computed only from complete, matched QP curves.
 
 ## Phase 3: Hardware-Aware Policy
+
+Status: algorithm implementation and matched evaluation complete. Batch-fill is
+retained as a baseline; feature-rich Adaptive-HW v1 is implemented and evaluated
+for P=1/2/4/8. On the current fixtures it does not dominate the simpler selected
+adaptive-threshold controller.
 
 Add policies parameterized by SATD features, activity, QP, CU size, P, and
 explicit hardware state. Include batch-boundary-aware actions without assuming
@@ -92,6 +102,11 @@ Gate:
 
 ## Phase 4: Cycle Model
 
+Status: initial analytical model complete and explicitly labeled estimated. It
+models candidate evaluations, batch service, fill/drain, lane utilization, and
+partial current-batch state; calibration against a complete RDO RTL datapath is
+deferred.
+
 Implement a fast analytical model for SATD, control, buffering, pipeline fill,
 RDO latency, bubbles, utilization, and `ceil(K/P)` batches. Add conservative
 dominance pruning and calibrate parameters against the RTL testbench later.
@@ -103,6 +118,11 @@ Gate:
 - Model outputs identify estimates rather than measured RTL values.
 
 ## Phase 5: Parameterized RTL Prototype
+
+Status: not started for the Full-RDO datapath. An earlier scheduler-only artifact
+and Verilator regression remain available but are not treated as a final hardware
+result. `docs/rtl_rdo_spec.md` defines the next-phase interface after the software
+algorithm gate passed.
 
 Implement functionally correct SATD/ranking, K control, candidate dispatch, P
 parallel simplified RDO processing elements, and best-mode reduction. Parameters
@@ -117,6 +137,10 @@ Gate:
 - Synthesis reports are parsed from tool output, never fabricated.
 
 ## Phase 6: CHIA Agentic Loop
+
+Status: deterministic local CHIA orchestration checkpoint complete for cached
+proposal, experiment, evaluation, and Pareto-state transitions. Autonomous policy
+generation and full resource-tagged local/GCP execution remain future work.
 
 Represent HEVC evaluation, model screening, RTL simulation, local synthesis,
 result persistence, and Pareto evaluation as resource-tagged `ChiaFunction`

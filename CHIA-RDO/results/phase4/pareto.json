@@ -1,0 +1,153 @@
+{
+  "adaptive_threshold_acceptance": {
+    "aggregate_bd_rate": true,
+    "aggregate_winner_retention": true,
+    "per_workload_bd_rate": true,
+    "per_workload_winner_retention": true,
+    "positive_rdo_reduction": true
+  },
+  "axes": [
+    "BD-rate degradation",
+    "RDO reduction",
+    "estimated hardware cycles"
+  ],
+  "comparison_parallelism": 8,
+  "frontier": [
+    {
+      "avg_k": 21.62813165746219,
+      "bd_rate_percent": -0.02556479418345618,
+      "estimated_batches_p8": 3.1773042192010377,
+      "estimated_cycles_p8": 33.59573797280934,
+      "policy": "adaptive_threshold",
+      "rdo_reduction": 0.3820533812153659,
+      "winner_retention": 0.9790795876191369
+    },
+    {
+      "avg_k": 8.379808038723196,
+      "bd_rate_percent": 0.004915344343107512,
+      "estimated_batches_p8": 1.3319339112672077,
+      "estimated_cycles_p8": 16.987405201404872,
+      "policy": "adaptive_v0",
+      "rdo_reduction": 0.7605769131793373,
+      "winner_retention": 0.8012171658189113
+    },
+    {
+      "avg_k": 2.0,
+      "bd_rate_percent": 1.5591286363470032,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "fixed_k2",
+      "rdo_reduction": 0.9428571428571427,
+      "winner_retention": 0.5312552406840961
+    },
+    {
+      "avg_k": 4.0,
+      "bd_rate_percent": 1.3736187770627535,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "fixed_k4",
+      "rdo_reduction": 0.8857142857142857,
+      "winner_retention": 0.6631804560024843
+    }
+  ],
+  "schema_version": "chia-rdo.phase4-pareto.v1",
+  "selections": {
+    "balanced": "fixed_k16",
+    "final_policy": "adaptive_threshold",
+    "quality_optimal": "adaptive_threshold",
+    "speed_optimal": "fixed_k2"
+  },
+  "status": "PASS",
+  "summaries": [
+    {
+      "avg_k": 8.0,
+      "bd_rate_percent": 1.4299221515002254,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "adaptive_hw_batch_fill_p8",
+      "rdo_reduction": 0.7714285714285715,
+      "winner_retention": 0.7559657715976762
+    },
+    {
+      "avg_k": 21.208357882849707,
+      "bd_rate_percent": 0.013161820299008772,
+      "estimated_batches_p8": 2.913805312929816,
+      "estimated_cycles_p8": 31.224247816368344,
+      "policy": "adaptive_hw_v1_p8",
+      "rdo_reduction": 0.39404691763286553,
+      "winner_retention": 0.9101834422757976
+    },
+    {
+      "avg_k": 21.62813165746219,
+      "bd_rate_percent": -0.02556479418345618,
+      "estimated_batches_p8": 3.1773042192010377,
+      "estimated_cycles_p8": 33.59573797280934,
+      "policy": "adaptive_threshold",
+      "rdo_reduction": 0.3820533812153659,
+      "winner_retention": 0.9790795876191369
+    },
+    {
+      "avg_k": 8.379808038723196,
+      "bd_rate_percent": 0.004915344343107512,
+      "estimated_batches_p8": 1.3319339112672077,
+      "estimated_cycles_p8": 16.987405201404872,
+      "policy": "adaptive_v0",
+      "rdo_reduction": 0.7605769131793373,
+      "winner_retention": 0.8012171658189113
+    },
+    {
+      "avg_k": 16.0,
+      "bd_rate_percent": 0.015778648262920747,
+      "estimated_batches_p8": 2.0,
+      "estimated_cycles_p8": 23.0,
+      "policy": "fixed_k16",
+      "rdo_reduction": 0.5428571428571429,
+      "winner_retention": 0.8569668458781362
+    },
+    {
+      "avg_k": 2.0,
+      "bd_rate_percent": 1.5591286363470032,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "fixed_k2",
+      "rdo_reduction": 0.9428571428571427,
+      "winner_retention": 0.5312552406840961
+    },
+    {
+      "avg_k": 4.0,
+      "bd_rate_percent": 1.3736187770627535,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "fixed_k4",
+      "rdo_reduction": 0.8857142857142857,
+      "winner_retention": 0.6631804560024843
+    },
+    {
+      "avg_k": 8.0,
+      "bd_rate_percent": 1.4299221515002254,
+      "estimated_batches_p8": 1.0,
+      "estimated_cycles_p8": 14.0,
+      "policy": "fixed_k8",
+      "rdo_reduction": 0.7714285714285715,
+      "winner_retention": 0.7559657715976762
+    },
+    {
+      "avg_k": 35.0,
+      "bd_rate_percent": 0.0,
+      "estimated_batches_p8": 5.0,
+      "estimated_cycles_p8": 50.0,
+      "policy": "full_rdo",
+      "rdo_reduction": 0.0,
+      "winner_retention": 1.0
+    },
+    {
+      "avg_k": 26.52795829244404,
+      "bd_rate_percent": 0.0013113228316023278,
+      "estimated_batches_p8": 3.7143344147873534,
+      "estimated_cycles_p8": 38.42900973308618,
+      "policy": "relative_satd",
+      "rdo_reduction": 0.24205833450159883,
+      "winner_retention": 0.9208064284980989
+    }
+  ]
+}

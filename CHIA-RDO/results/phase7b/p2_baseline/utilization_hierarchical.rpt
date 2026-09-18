@@ -1,0 +1,37 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date         : Sat Sep 12 21:25:41 2026
+| Host         : duong-nguyen-hieu-ThinkPad-T14p-Gen-2 running 64-bit Ubuntu 24.04.4 LTS
+| Command      : report_utilization -hierarchical -hierarchical_depth 8 -file results/phase7b/p2_baseline/utilization_hierarchical.rpt
+| Design       : full_rdo_pway
+| Device       : xck26-sfvc784-2LV-c
+| Speed File   : -2LV
+| Design State : Routed
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++----------------------------------+----------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+|             Instance             |        Module        | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | URAM | DSP Blocks |
++----------------------------------+----------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+| full_rdo_pway                    |                (top) |      70817 |      70817 |       0 |    0 | 1913 |      0 |      0 |    0 |        356 |
+|   (full_rdo_pway)                |                (top) |         29 |         29 |       0 |    0 | 1591 |      0 |      0 |    0 |          0 |
+|   candidate_lanes[0].lane_pe     |     full_rdo_mvp_4x4 |      34574 |      34574 |       0 |    0 |  161 |      0 |      0 |    0 |        178 |
+|     (candidate_lanes[0].lane_pe) |     full_rdo_mvp_4x4 |          2 |          2 |       0 |    0 |   41 |      0 |      0 |    0 |          0 |
+|     codec                        | full_rdo_codec_4x4_1 |      33816 |      33816 |       0 |    0 |    0 |      0 |      0 |    0 |        176 |
+|     rd_cost                      |             rdo_pe_2 |        756 |        756 |       0 |    0 |  120 |      0 |      0 |    0 |          2 |
+|   candidate_lanes[1].lane_pe     |   full_rdo_mvp_4x4_0 |      36215 |      36215 |       0 |    0 |  161 |      0 |      0 |    0 |        178 |
+|     (candidate_lanes[1].lane_pe) |   full_rdo_mvp_4x4_0 |         10 |         10 |       0 |    0 |   41 |      0 |      0 |    0 |          0 |
+|     codec                        |   full_rdo_codec_4x4 |      35512 |      35512 |       0 |    0 |    0 |      0 |      0 |    0 |        176 |
+|     rd_cost                      |               rdo_pe |        694 |        694 |       0 |    0 |  120 |      0 |      0 |    0 |          2 |
++----------------------------------+----------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+

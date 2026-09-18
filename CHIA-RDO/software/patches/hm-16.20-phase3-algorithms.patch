@@ -1,0 +1,306 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -59,7 +59,10 @@
+   CHIA_RDO_EXHAUSTIVE,
+   CHIA_RDO_FIXED,
+   CHIA_RDO_ADAPTIVE_V0,
+-  CHIA_RDO_ADAPTIVE_HW
++  CHIA_RDO_ADAPTIVE_HW,
++  CHIA_RDO_ADAPTIVE_THRESHOLD,
++  CHIA_RDO_RELATIVE_SATD,
++  CHIA_RDO_ADAPTIVE_HW_V1
+ };
+ 
+ struct ChiaRdoPolicyConfig
+@@ -72,10 +75,28 @@
+   UInt parallelism;
+   Double highThreshold;
+   Double mediumThreshold;
++  Double easyRoughThreshold;
++  Double hardRoughThreshold;
++  Double relativeSatdThreshold;
++  UInt relativeMinimumK;
++  UInt relativeMaximumK;
++  Double hwGapScale;
++  Double hwRelativeSatdScale;
++  Double hwQualityWeight;
++  Double hwCycleWeight;
++  Double hwWasteWeight;
++  UInt pipelineFillCycles;
++  UInt pipelineDrainCycles;
++  UInt rdoCyclesPerBatch;
++  UInt batchOverheadCycles;
+ 
+   ChiaRdoPolicyConfig()
+     : policy(CHIA_RDO_STOCK), fixedK(35), highK(4), mediumK(8), lowK(16), parallelism(1),
+-      highThreshold(0.088), mediumThreshold(0.045)
++      highThreshold(0.088), mediumThreshold(0.045), easyRoughThreshold(0.08),
++      hardRoughThreshold(0.20), relativeSatdThreshold(0.15), relativeMinimumK(4),
++      relativeMaximumK(35), hwGapScale(0.10), hwRelativeSatdScale(8.0),
++      hwQualityWeight(1.0), hwCycleWeight(0.30), hwWasteWeight(0.05),
++      pipelineFillCycles(3), pipelineDrainCycles(2), rdoCyclesPerBatch(8), batchOverheadCycles(1)
+   {
+     const char *name = std::getenv("CHIA_RDO_POLICY");
+     if (name == NULL || name[0] == '\0')
+@@ -88,7 +109,10 @@
+     else if (policyName == "fixed") policy = CHIA_RDO_FIXED;
+     else if (policyName == "adaptive_v0") policy = CHIA_RDO_ADAPTIVE_V0;
+     else if (policyName == "adaptive_hw") policy = CHIA_RDO_ADAPTIVE_HW;
+-    else chiaFail("CHIA_RDO_POLICY must be exhaustive, fixed, adaptive_v0, or adaptive_hw");
++    else if (policyName == "adaptive_threshold") policy = CHIA_RDO_ADAPTIVE_THRESHOLD;
++    else if (policyName == "relative_satd") policy = CHIA_RDO_RELATIVE_SATD;
++    else if (policyName == "adaptive_hw_v1") policy = CHIA_RDO_ADAPTIVE_HW_V1;
++    else chiaFail("unsupported CHIA_RDO_POLICY");
+ 
+     if (policy == CHIA_RDO_FIXED) fixedK = parseUInt("CHIA_RDO_FIXED_K", 0);
+     if (policy == CHIA_RDO_ADAPTIVE_V0 || policy == CHIA_RDO_ADAPTIVE_HW)
+@@ -108,6 +132,38 @@
+         }
+       }
+     }
++    if (policy == CHIA_RDO_ADAPTIVE_THRESHOLD)
++    {
++      easyRoughThreshold = parseDouble("CHIA_RDO_EASY_ROUGH_THRESHOLD", easyRoughThreshold);
++      hardRoughThreshold = parseDouble("CHIA_RDO_HARD_ROUGH_THRESHOLD", hardRoughThreshold);
++      highK = parseUInt("CHIA_RDO_EASY_K", highK);
++      mediumK = parseUInt("CHIA_RDO_MEDIUM_K", mediumK);
++      lowK = parseUInt("CHIA_RDO_HARD_K", lowK);
++      if (easyRoughThreshold > hardRoughThreshold) chiaFail("rough thresholds must satisfy easy <= hard");
++    }
++    if (policy == CHIA_RDO_RELATIVE_SATD)
++    {
++      relativeSatdThreshold = parseDouble("CHIA_RDO_RELATIVE_SATD_THRESHOLD", relativeSatdThreshold);
++      relativeMinimumK = parseUInt("CHIA_RDO_MIN_K", relativeMinimumK);
++      relativeMaximumK = parseUInt("CHIA_RDO_MAX_K", relativeMaximumK);
++      if (relativeMinimumK > relativeMaximumK) chiaFail("relative SATD K bounds must satisfy min <= max");
++    }
++    if (policy == CHIA_RDO_ADAPTIVE_HW_V1)
++    {
++      parallelism = parseUInt("CHIA_RDO_P", 0);
++      if (parallelism != 1 && parallelism != 2 && parallelism != 4 && parallelism != 8) chiaFail("CHIA_RDO_P must be one of 1,2,4,8");
++      relativeSatdThreshold = parseDouble("CHIA_RDO_RELATIVE_SATD_THRESHOLD", relativeSatdThreshold);
++      hwGapScale = parseDouble("CHIA_RDO_HW_GAP_SCALE", hwGapScale);
++      hwRelativeSatdScale = parseDouble("CHIA_RDO_HW_RELATIVE_SATD_SCALE", hwRelativeSatdScale);
++      hwQualityWeight = parseDouble("CHIA_RDO_HW_QUALITY_WEIGHT", hwQualityWeight);
++      hwCycleWeight = parseDouble("CHIA_RDO_HW_CYCLE_WEIGHT", hwCycleWeight);
++      hwWasteWeight = parseDouble("CHIA_RDO_HW_WASTE_WEIGHT", hwWasteWeight);
++      pipelineFillCycles = parseUInt("CHIA_RDO_PIPELINE_FILL", pipelineFillCycles);
++      pipelineDrainCycles = parseUInt("CHIA_RDO_PIPELINE_DRAIN", pipelineDrainCycles);
++      rdoCyclesPerBatch = parseUInt("CHIA_RDO_RDO_CYCLES", rdoCyclesPerBatch);
++      batchOverheadCycles = parseUInt("CHIA_RDO_BATCH_OVERHEAD", batchOverheadCycles);
++      if (hwGapScale <= 0.0 || hwRelativeSatdScale <= 0.0) chiaFail("hardware feature scales must be positive");
++    }
+   }
+ 
+   static Void chiaFail(const char *message)
+@@ -157,6 +213,9 @@
+     case CHIA_RDO_FIXED: return "fixed";
+     case CHIA_RDO_ADAPTIVE_V0: return "adaptive_v0";
+     case CHIA_RDO_ADAPTIVE_HW: return "adaptive_hw";
++    case CHIA_RDO_ADAPTIVE_THRESHOLD: return "adaptive_threshold";
++    case CHIA_RDO_RELATIVE_SATD: return "relative_satd";
++    case CHIA_RDO_ADAPTIVE_HW_V1: return "adaptive_hw_v1";
+     default: return "stock";
+   }
+ }
+@@ -2417,6 +2476,14 @@
+     UInt chiaRankingCount = numModesForFullRD;
+     UInt chiaSelectedK = numModesForFullRD;
+     Double chiaConfidence = 0.0;
++    Double chiaNormalizedBestRoughCost = 0.0;
++    Double chiaActivity = 0.0;
++    Double chiaActivityNorm = 0.0;
++    UInt chiaRelativeSatdCount = 0;
++    Double chiaPolicyDifficulty = 0.0;
++    Double chiaPolicyObjective = 0.0;
++    UInt chiaEstimatedBatches = 0;
++    UInt chiaEstimatedCycles = 0;
+     for (Int i = 0; i < numModesAvailable; i++)
+     {
+       chiaSatdByMode[i] = 0;
+@@ -2452,6 +2519,20 @@
+       Pel* piOrg         = pcOrgYuv ->getAddr( COMPONENT_Y, uiAbsPartIdx );
+       Pel* piPred        = pcPredYuv->getAddr( COMPONENT_Y, uiAbsPartIdx );
+       UInt uiStride      = pcPredYuv->getStride( COMPONENT_Y );
++      const UInt chiaPuArea = puRect.width * puRect.height;
++      Int64 chiaSampleSum = 0;
++      for (UInt y = 0; y < puRect.height; y++)
++      {
++        for (UInt x = 0; x < puRect.width; x++) chiaSampleSum += piOrg[y * uiStride + x];
++      }
++      const Double chiaSampleMean = Double(chiaSampleSum) / Double(chiaPuArea);
++      Double chiaAbsoluteDeviation = 0.0;
++      for (UInt y = 0; y < puRect.height; y++)
++      {
++        for (UInt x = 0; x < puRect.width; x++) chiaAbsoluteDeviation += fabs(Double(piOrg[y * uiStride + x]) - chiaSampleMean);
++      }
++      chiaActivity = chiaAbsoluteDeviation / Double(chiaPuArea);
++      chiaActivityNorm = chiaActivity / Double((1 << sps.getBitDepth(CHANNEL_TYPE_LUMA)) - 1);
+       DistParam distParam;
+       const Bool bUseHadamard=pcCU->getCUTransquantBypass(0) == 0;
+       m_pcRdCost->setDistParam(distParam, sps.getBitDepth(CHANNEL_TYPE_LUMA), piOrg, uiStride, piPred, uiStride, puRect.width, puRect.height, bUseHadamard);
+@@ -2487,15 +2568,24 @@
+ 
+       if (chiaControlled)
+       {
++        const Double chiaFirstCost = chiaRoughCostByMode[uiRdModeList[0]];
++        const Double chiaSecondCost = chiaRoughCostByMode[uiRdModeList[1]];
++        chiaConfidence = chiaFirstCost > 0.0 ? (chiaSecondCost - chiaFirstCost) / chiaFirstCost : 0.0;
++        chiaNormalizedBestRoughCost = chiaFirstCost / Double(chiaPuArea * ((1 << sps.getBitDepth(CHANNEL_TYPE_LUMA)) - 1));
++        Distortion chiaMinimumSatd = chiaSatdByMode[0];
++        for (Int mode = 1; mode < numModesAvailable; mode++) chiaMinimumSatd = std::min(chiaMinimumSatd, chiaSatdByMode[mode]);
++        const Double chiaSatdDenominator = Double(std::max<Distortion>(chiaMinimumSatd, 1));
++        for (Int mode = 0; mode < numModesAvailable; mode++)
++        {
++          const Double relativeSatd = Double(chiaSatdByMode[mode] - chiaMinimumSatd) / chiaSatdDenominator;
++          if (relativeSatd <= chiaPolicyConfig.relativeSatdThreshold) chiaRelativeSatdCount++;
++        }
+         if (chiaPolicyConfig.policy == CHIA_RDO_FIXED)
+         {
+           chiaSelectedK = chiaPolicyConfig.fixedK;
+         }
+         else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_V0 || chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW)
+         {
+-          const Double firstCost = chiaRoughCostByMode[uiRdModeList[0]];
+-          const Double secondCost = chiaRoughCostByMode[uiRdModeList[1]];
+-          chiaConfidence = firstCost > 0.0 ? (secondCost - firstCost) / firstCost : 0.0;
+           chiaSelectedK = chiaConfidence >= chiaPolicyConfig.highThreshold ? chiaPolicyConfig.highK
+                         : chiaConfidence >= chiaPolicyConfig.mediumThreshold ? chiaPolicyConfig.mediumK
+                         : chiaPolicyConfig.lowK;
+@@ -2512,6 +2602,68 @@
+             }
+           }
+         }
++        else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_THRESHOLD)
++        {
++          chiaSelectedK = chiaNormalizedBestRoughCost <= chiaPolicyConfig.easyRoughThreshold ? chiaPolicyConfig.highK
++                        : chiaNormalizedBestRoughCost <= chiaPolicyConfig.hardRoughThreshold ? chiaPolicyConfig.mediumK
++                        : chiaPolicyConfig.lowK;
++        }
++        else if (chiaPolicyConfig.policy == CHIA_RDO_RELATIVE_SATD || chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW_V1)
++        {
++          if (chiaPolicyConfig.policy == CHIA_RDO_RELATIVE_SATD)
++          {
++            const UInt requiredK = std::max(chiaPolicyConfig.relativeMinimumK, std::min(chiaRelativeSatdCount, chiaPolicyConfig.relativeMaximumK));
++            const UInt levels[5] = {2, 4, 8, 16, 35};
++            chiaSelectedK = chiaPolicyConfig.relativeMaximumK;
++            for (UInt level = 0; level < 5; level++)
++            {
++              if (levels[level] >= requiredK && levels[level] <= chiaPolicyConfig.relativeMaximumK)
++              {
++                chiaSelectedK = levels[level];
++                break;
++              }
++            }
++          }
++          else
++          {
++            const Double gapUncertainty = 1.0 - std::min(chiaConfidence / chiaPolicyConfig.hwGapScale, 1.0);
++            const Double satdAmbiguity = std::min(Double(chiaRelativeSatdCount) / chiaPolicyConfig.hwRelativeSatdScale, 1.0);
++            const Double qualityPressure = std::min(std::max((37.0 - Double(pcCU->getQP(uiPartOffset))) / 15.0, 0.0), 1.0);
++            const Double sizePressure = std::min(sqrt(Double(chiaPuArea) / 4096.0), 1.0);
++            chiaPolicyDifficulty = 0.30 * gapUncertainty + 0.20 * satdAmbiguity
++                                  + 0.20 * std::min(chiaActivityNorm, 1.0)
++                                  + 0.10 * std::min(chiaNormalizedBestRoughCost, 1.0)
++                                  + 0.10 * qualityPressure + 0.10 * sizePressure;
++            const UInt levels[5] = {2, 4, 8, 16, 35};
++            const UInt fullBatches = (35 + chiaPolicyConfig.parallelism - 1) / chiaPolicyConfig.parallelism;
++            const UInt fullCycles = chiaPolicyConfig.pipelineFillCycles
++                                  + fullBatches * (chiaPolicyConfig.rdoCyclesPerBatch + chiaPolicyConfig.batchOverheadCycles)
++                                  + chiaPolicyConfig.pipelineDrainCycles;
++            Double bestObjective = MAX_DOUBLE;
++            for (UInt level = 0; level < 5; level++)
++            {
++              const UInt k = levels[level];
++              const UInt batches = (k + chiaPolicyConfig.parallelism - 1) / chiaPolicyConfig.parallelism;
++              const UInt cycles = chiaPolicyConfig.pipelineFillCycles
++                                + batches * (chiaPolicyConfig.rdoCyclesPerBatch + chiaPolicyConfig.batchOverheadCycles)
++                                + chiaPolicyConfig.pipelineDrainCycles;
++              const Double missRisk = chiaPolicyDifficulty * Double(35 - k) / 35.0;
++              const Double cycleRatio = Double(cycles) / Double(fullCycles);
++              const Double laneWaste = 1.0 - Double(k) / Double(batches * chiaPolicyConfig.parallelism);
++              const Double objective = chiaPolicyConfig.hwQualityWeight * missRisk
++                                     + chiaPolicyConfig.hwCycleWeight * cycleRatio
++                                     + chiaPolicyConfig.hwWasteWeight * laneWaste;
++              if (objective < bestObjective)
++              {
++                bestObjective = objective;
++                chiaSelectedK = k;
++                chiaEstimatedBatches = batches;
++                chiaEstimatedCycles = cycles;
++              }
++            }
++            chiaPolicyObjective = bestObjective;
++          }
++        }
+       }
+       else if (m_pcEncCfg->getFastUDIUseMPMEnabled())
+       {
+@@ -2741,9 +2893,17 @@
+       if (!chiaExhaustive && chiaControlled)
+       {
+         *chiaTrace << "],\"trace_schema\":\"chia-rdo.policy-trace.v1\""
++                   << ",\"feature_schema\":\"chia-rdo.feature-vector.v1\""
+                    << ",\"ranking_count\":" << chiaRankingCount
+                    << ",\"selected_k\":" << chiaSelectedK
+                    << ",\"confidence\":" << chiaConfidence
++                   << ",\"top1_rough_cost\":" << chiaRoughCostByMode[uiRdModeList[0]]
++                   << ",\"top2_rough_cost\":" << chiaRoughCostByMode[uiRdModeList[1]]
++                   << ",\"top2_gap\":" << (chiaRoughCostByMode[uiRdModeList[1]] - chiaRoughCostByMode[uiRdModeList[0]])
++                   << ",\"normalized_best_rough_cost\":" << chiaNormalizedBestRoughCost
++                   << ",\"activity\":" << chiaActivity
++                   << ",\"activity_norm\":" << chiaActivityNorm
++                   << ",\"relative_satd_count\":" << chiaRelativeSatdCount
+                    << ",\"evaluated_modes\":[";
+         for (UInt i = 0; i < chiaSelectedK; i++)
+         {
+@@ -2764,6 +2924,27 @@
+             *chiaTrace << uiRdModeList[i];
+           }
+         }
++        else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW_V1)
++        {
++          *chiaTrace << "],\"parallelism_p\":" << chiaPolicyConfig.parallelism
++                     << ",\"batch_count\":" << chiaEstimatedBatches
++                     << ",\"estimated_cycles\":" << chiaEstimatedCycles
++                     << ",\"pipeline_fill_cycles\":" << chiaPolicyConfig.pipelineFillCycles
++                     << ",\"pipeline_drain_cycles\":" << chiaPolicyConfig.pipelineDrainCycles
++                     << ",\"rdo_cycles_per_batch\":" << chiaPolicyConfig.rdoCyclesPerBatch
++                     << ",\"batch_overhead_cycles\":" << chiaPolicyConfig.batchOverheadCycles
++                     << ",\"current_batch_position\":0"
++                     << ",\"remaining_batch_capacity\":" << chiaPolicyConfig.parallelism
++                     << ",\"pending_batches\":0"
++                     << ",\"policy_difficulty\":" << chiaPolicyDifficulty
++                     << ",\"policy_objective\":" << chiaPolicyObjective
++                     << ",\"hardware_evaluated_modes\":[";
++          for (UInt i = 0; i < chiaSelectedK; i++)
++          {
++            if (i != 0) *chiaTrace << ',';
++            *chiaTrace << uiRdModeList[i];
++          }
++        }
+       }
+       *chiaTrace << "],\"satd_by_mode\":[";
+       for (Int i = 0; i < numModesAvailable; i++)
+@@ -2771,6 +2952,21 @@
+         if (i != 0) *chiaTrace << ',';
+         *chiaTrace << chiaSatdByMode[i];
+       }
++      if (!chiaExhaustive && chiaControlled)
++      {
++        *chiaTrace << "],\"satd_rank_by_mode\":[";
++        for (Int mode = 0; mode < numModesAvailable; mode++)
++        {
++          UInt satdRank = 0;
++          for (Int other = 0; other < numModesAvailable; other++)
++          {
++            if (chiaSatdByMode[other] < chiaSatdByMode[mode]
++                || (chiaSatdByMode[other] == chiaSatdByMode[mode] && other < mode)) satdRank++;
++          }
++          if (mode != 0) *chiaTrace << ',';
++          *chiaTrace << satdRank;
++        }
++      }
+       *chiaTrace << "],\"mode_bits_by_mode\":[";
+       for (Int i = 0; i < numModesAvailable; i++)
+       {

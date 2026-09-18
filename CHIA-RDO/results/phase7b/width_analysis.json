@@ -1,0 +1,118 @@
+{
+  "minimum_corpus_safe_cost_width": 31,
+  "modes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+  ],
+  "qps": [
+    22,
+    27,
+    32,
+    37
+  ],
+  "ranges": {
+    "dequantized": {
+      "maximum": 14400,
+      "minimum": -25920,
+      "minimum_observed_width_bits": 16,
+      "signed": true
+    },
+    "distortion": {
+      "maximum": 5631,
+      "minimum": 14,
+      "minimum_observed_width_bits": 13,
+      "signed": false
+    },
+    "inverse_residual": {
+      "maximum": 276,
+      "minimum": -284,
+      "minimum_observed_width_bits": 10,
+      "signed": true
+    },
+    "lambda_q16": {
+      "maximum": 12048642,
+      "minimum": 376520,
+      "minimum_observed_width_bits": 24,
+      "signed": false
+    },
+    "prediction": {
+      "maximum": 255,
+      "minimum": 0,
+      "minimum_observed_width_bits": 8,
+      "signed": false
+    },
+    "quantized": {
+      "maximum": 56,
+      "minimum": -98,
+      "minimum_observed_width_bits": 8,
+      "signed": true
+    },
+    "rate_bits": {
+      "maximum": 138,
+      "minimum": 1,
+      "minimum_observed_width_bits": 8,
+      "signed": false
+    },
+    "rd_cost_q16": {
+      "maximum": 1312532898,
+      "minimum": 6205480,
+      "minimum_observed_width_bits": 31,
+      "signed": false
+    },
+    "reconstruction": {
+      "maximum": 255,
+      "minimum": 0,
+      "minimum_observed_width_bits": 8,
+      "signed": false
+    },
+    "residual": {
+      "maximum": 255,
+      "minimum": -255,
+      "minimum_observed_width_bits": 9,
+      "signed": true
+    },
+    "transform": {
+      "maximum": 14478,
+      "minimum": -25791,
+      "minimum_observed_width_bits": 16,
+      "signed": true
+    }
+  },
+  "schema_version": "chia-rdo.phase7b-width-analysis.v1",
+  "scope": "Observed frozen corpus ranges; not a formal proof outside this corpus",
+  "updated_utc": "2026-09-13T03:41:45.038879Z",
+  "vectors": 8960
+}

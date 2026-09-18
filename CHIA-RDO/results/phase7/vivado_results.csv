@@ -1,0 +1,4 @@
+experiment_id,build_id,p,status,implementation_stage,lut,ff,bram,uram,dsp,wns_ns,tns_ns,fmax_mhz,timing_status,power_w,elapsed_seconds
+phase7-vivado-p1-d2-b35-w56,p1-d2-b35-w56,1,ROUTE_PASS,routing,36454,1714,0,0,178,-60.395,-1924.988,15.291688967046408,FAIL,1.667,729.973117
+phase7-vivado-p2-d2-b35-w56,p2-d2-b35-w56,2,ROUTE_PASS,routing,70817,1913,0,0,356,-64.653,-4672.687,14.356883407749844,FAIL,2.773,1333.037187
+phase7-vivado-p4-d2-b35-w56,p4-d2-b35-w56,4,PLACE_FAIL,synthesis,140102,2221,0,0,712,,,,NOT_AVAILABLE,,753.527171

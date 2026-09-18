@@ -1,0 +1,104 @@
+{
+  "aggregate_compile_seconds": 33.48931638900001,
+  "aggregate_simulation_seconds": 0.7616687249998222,
+  "candidate_vector_evaluations": 8960,
+  "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+  "execution_backend": "GCP Verilator",
+  "interface_fail": 0,
+  "latency_cycles": 115,
+  "modes": 35,
+  "qps": [
+    22,
+    27,
+    32,
+    37
+  ],
+  "schema_version": "chia-rdo.phase7b-serial-gate.v1",
+  "shards": [
+    {
+      "compile_seconds": 10.301242622000018,
+      "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+      "end_index_exclusive": 2240,
+      "interface_fail": 0,
+      "latency_cycles": 115,
+      "modes": 35,
+      "qps": [
+        22
+      ],
+      "schema_version": "chia-rdo.phase7b-serial-shard.v1",
+      "shard_count": 4,
+      "shard_id": 0,
+      "simulation_seconds": 0.248755889999984,
+      "stage_fail": 0,
+      "start_index": 0,
+      "status": "PASS",
+      "total_fail": 0,
+      "vectors": 2240
+    },
+    {
+      "compile_seconds": 7.795976720999988,
+      "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+      "end_index_exclusive": 4480,
+      "interface_fail": 0,
+      "latency_cycles": 115,
+      "modes": 35,
+      "qps": [
+        27
+      ],
+      "schema_version": "chia-rdo.phase7b-serial-shard.v1",
+      "shard_count": 4,
+      "shard_id": 1,
+      "simulation_seconds": 0.16759990900004595,
+      "stage_fail": 0,
+      "start_index": 2240,
+      "status": "PASS",
+      "total_fail": 0,
+      "vectors": 2240
+    },
+    {
+      "compile_seconds": 7.747998110000026,
+      "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+      "end_index_exclusive": 6720,
+      "interface_fail": 0,
+      "latency_cycles": 115,
+      "modes": 35,
+      "qps": [
+        32
+      ],
+      "schema_version": "chia-rdo.phase7b-serial-shard.v1",
+      "shard_count": 4,
+      "shard_id": 2,
+      "simulation_seconds": 0.1728680069998063,
+      "stage_fail": 0,
+      "start_index": 4480,
+      "status": "PASS",
+      "total_fail": 0,
+      "vectors": 2240
+    },
+    {
+      "compile_seconds": 7.644098935999978,
+      "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+      "end_index_exclusive": 8960,
+      "interface_fail": 0,
+      "latency_cycles": 115,
+      "modes": 35,
+      "qps": [
+        37
+      ],
+      "schema_version": "chia-rdo.phase7b-serial-shard.v1",
+      "shard_count": 4,
+      "shard_id": 3,
+      "simulation_seconds": 0.17244491899998593,
+      "stage_fail": 0,
+      "start_index": 6720,
+      "status": "PASS",
+      "total_fail": 0,
+      "vectors": 2240
+    }
+  ],
+  "stage_fail": 0,
+  "status": "PASS",
+  "total_fail": 0,
+  "vectors": 8960,
+  "worker_count": 4
+}

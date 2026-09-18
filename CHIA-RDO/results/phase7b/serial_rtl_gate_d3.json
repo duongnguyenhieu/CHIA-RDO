@@ -1,0 +1,24 @@
+{
+  "compile_seconds": 10.30186286099999,
+  "corpus_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+  "end_index_exclusive": 8960,
+  "interface_fail": 0,
+  "latency_cycles": 132,
+  "modes": 35,
+  "pipeline_depth": 3,
+  "qps": [
+    22,
+    27,
+    32,
+    37
+  ],
+  "schema_version": "chia-rdo.phase7b-serial-shard.v1",
+  "shard_count": 1,
+  "shard_id": 0,
+  "simulation_seconds": 1.0752990640000064,
+  "stage_fail": 0,
+  "start_index": 0,
+  "status": "PASS",
+  "total_fail": 0,
+  "vectors": 8960
+}

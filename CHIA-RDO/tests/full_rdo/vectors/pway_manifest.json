@@ -1,0 +1,95 @@
+{
+  "candidate_sha256": "54b0dc5975157800875103377c958e11a929bfdcffa016f9577fd2d34625e3f8",
+  "candidates": 8960,
+  "created_utc": "2026-09-11T03:24:46.640363Z",
+  "group_sha256": "41ad8eed65f7ad3988f7c31836ee0e04d084f6768f9c48116f834707960e6115",
+  "groups": 256,
+  "hm_revision": "22178e370178133438c0339f57b3b3a29f112909",
+  "k_values": [
+    4,
+    16,
+    35
+  ],
+  "mode_counts": {
+    "0": 256,
+    "1": 256,
+    "2": 256,
+    "3": 256,
+    "4": 256,
+    "5": 256,
+    "6": 256,
+    "7": 256,
+    "8": 256,
+    "9": 256,
+    "10": 256,
+    "11": 256,
+    "12": 256,
+    "13": 256,
+    "14": 256,
+    "15": 256,
+    "16": 256,
+    "17": 256,
+    "18": 256,
+    "19": 256,
+    "20": 256,
+    "21": 256,
+    "22": 256,
+    "23": 256,
+    "24": 256,
+    "25": 256,
+    "26": 256,
+    "27": 256,
+    "28": 256,
+    "29": 256,
+    "30": 256,
+    "31": 256,
+    "32": 256,
+    "33": 256,
+    "34": 256
+  },
+  "oracle_validation": "all 35 modes exact at every candidate stage before emission",
+  "p_values": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "qp_counts": {
+    "22": 2240,
+    "27": 2240,
+    "32": 2240,
+    "37": 2240
+  },
+  "schema_version": "chia-rdo.pway-vectors.v1",
+  "source_sha256": "1ba7c09220b0c0124db023bc5b1549fc8da68f70a8c7f4e51348f7d84a2b6a6a",
+  "traces": [
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "b947867ca078ba4003e01a5b02330555116045f49be867abce7d89dd27877b9b",
+      "qp": 22,
+      "selected_groups": 64,
+      "trace_sha256": "2dac7883f2b0255e26095a1ee3b02d4132498d012b5bbe122287c6ea88827253"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "a9f3630f7fe8e8d3fca7dee9836ed6e791ab9aa5a4aaa95aac5cae4988cb4594",
+      "qp": 27,
+      "selected_groups": 64,
+      "trace_sha256": "90a82ef3eb93521f6cd1e89c3ac74044170467e59315a9ffea65c8a919d9dc6a"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "0c94203c1fd9abc61a04cdec37864df2b0ffcfe5c7b4f49c488e8c09c0914399",
+      "qp": 32,
+      "selected_groups": 64,
+      "trace_sha256": "3fe31aca527fa6d7dd0867fc8d52eb6886918d1e84a6450a30d60396933ae0ae"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "a5104efc56e69ac4729f6da52f5d2c5314bd255082a0c6888564ea60c71e39db",
+      "qp": 37,
+      "selected_groups": 64,
+      "trace_sha256": "0c64982382e08df778a714943daa47045eb406a519d85f2bbab8c5f274afada3"
+    }
+  ]
+}

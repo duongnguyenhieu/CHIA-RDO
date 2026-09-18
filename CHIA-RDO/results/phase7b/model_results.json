@@ -1,0 +1,177 @@
+{
+  "cache_hits": 832,
+  "calibration": {
+    "2": {
+      "architecture": "resource_shared_serial",
+      "batch_cycles": 117,
+      "bram": 0,
+      "build_id": "serial-p1-d2-w31",
+      "candidate_latency_cycles": 115,
+      "candidate_throughput_proxy_per_second": 540129.4582285483,
+      "carry8": 220,
+      "cost_width": 31,
+      "critical_path": {
+        "data_path_delay_ns": 15.672,
+        "destination": "candidate_lanes[0].lane_pe/dequantized_sample_reg_r1_0_15_14_27/RAMA_D1/I",
+        "logic_levels": 50,
+        "slack_ns": -10.824,
+        "source": "candidate_lanes[0].lane_pe/sample_index_reg[0]_rep_replica/C"
+      },
+      "dsp": 55,
+      "ff": 2136,
+      "fmax_mhz": 63.19514661274014,
+      "lut": 4183,
+      "p": 1,
+      "pipeline_depth": 2,
+      "power_w": 0.424,
+      "raw_report_directory": "build/phase7b/vivado/serial-p1-d2-w31",
+      "relative_to_baseline_p1": {
+        "candidate_throughput_fraction": 0.14128706368342367,
+        "dsp_reduction_fraction": 0.6910112359550562,
+        "fmax_improvement": 4.132646612740142,
+        "lut_reduction_fraction": 0.8852526471717781
+      },
+      "resource_accounting": "Vivado report_utilization physical resources",
+      "status": "ROUTE_PASS",
+      "timing_status": "FAIL",
+      "tns_ns": -4979.498,
+      "uram": 0,
+      "winner_reduction": "serial_scan",
+      "wns_ns": -10.824
+    },
+    "3": {
+      "architecture": "resource_shared_serial",
+      "batch_cycles": 134,
+      "bram": 0,
+      "build_id": "serial-p1-d3-w31",
+      "candidate_latency_cycles": 132,
+      "candidate_throughput_proxy_per_second": 574096.974164488,
+      "carry8": 206,
+      "cost_width": 31,
+      "critical_path": {
+        "data_path_delay_ns": 12.847,
+        "destination": "candidate_lanes[0].lane_pe/residual_sample_reg_r1_0_15_14_27/RAMG_D1/I",
+        "logic_levels": 39,
+        "slack_ns": -7.999,
+        "source": "candidate_lanes[0].lane_pe/sample_index_reg[0]/C"
+      },
+      "dsp": 51,
+      "ff": 2170,
+      "fmax_mhz": 76.9289945380414,
+      "lut": 3930,
+      "p": 1,
+      "pipeline_depth": 3,
+      "power_w": 0.419,
+      "raw_report_directory": "build/phase7b/vivado/serial-p1-d3-w31",
+      "relative_to_baseline_p1": {
+        "candidate_throughput_fraction": 0.1501722865019468,
+        "dsp_reduction_fraction": 0.7134831460674158,
+        "fmax_improvement": 5.030771597815217,
+        "lut_reduction_fraction": 0.8921929006419048
+      },
+      "resource_accounting": "Vivado report_utilization physical resources",
+      "status": "ROUTE_PASS",
+      "timing_status": "FAIL",
+      "tns_ns": -3614.092,
+      "uram": 0,
+      "winner_reduction": "serial_scan",
+      "wns_ns": -7.999
+    },
+    "batch_cycles": {
+      "2": 117,
+      "3": 134
+    },
+    "budgets": {
+      "bram_tile": 100,
+      "carry8": 10248,
+      "clb_lut": 81984,
+      "clb_register": 163968,
+      "dsp48e2": 873,
+      "uram": 44
+    },
+    "measured_fits": {
+      "2": {
+        "carry8": {
+          "intercept": 7.5652173913043725,
+          "points": 4,
+          "slope": 211.18260869565216
+        },
+        "dsp": {
+          "intercept": 0.0,
+          "points": 4,
+          "slope": 55.0
+        },
+        "ff": {
+          "intercept": 1515.8695652173915,
+          "points": 4,
+          "slope": 613.8347826086956
+        },
+        "fmax_log2": {
+          "intercept": 62.38222230412236,
+          "points": 4,
+          "slope": -1.1316200365638935
+        },
+        "lut": {
+          "intercept": 255.6956521739139,
+          "points": 4,
+          "slope": 4035.5478260869563
+        },
+        "power_w": {
+          "intercept": 0.3021304347826088,
+          "points": 4,
+          "slope": 0.12536521739130435
+        }
+      },
+      "3": {
+        "carry8": {
+          "intercept": 7.2123411978222975,
+          "points": 7,
+          "slope": 197.1878402903811
+        },
+        "dsp": {
+          "intercept": 0.0,
+          "points": 7,
+          "slope": 51.0
+        },
+        "ff": {
+          "intercept": 1561.248638838476,
+          "points": 7,
+          "slope": 646.1814882032667
+        },
+        "fmax_log2": {
+          "intercept": 76.60935865704366,
+          "points": 7,
+          "slope": -2.1996923268803434
+        },
+        "lut": {
+          "intercept": 234.9219600725919,
+          "points": 7,
+          "slope": 3816.238656987296
+        },
+        "power_w": {
+          "intercept": 0.2808112522686027,
+          "points": 7,
+          "slope": 0.12483303085299452
+        }
+      }
+    },
+    "minimum_corpus_safe_cost_width": 31,
+    "static_power_w": 0.289
+  },
+  "candidate_count": 832,
+  "chia_run_id": "phase7b-b873ba196223",
+  "created_utc": "2026-09-13T06:51:20.787333Z",
+  "git_commit": "03c33138c7b1686b83cc7627d54808cd972b3bc9",
+  "git_dirty": true,
+  "model_version": "serial-balanced-tree-fit.v3",
+  "new_evaluations": 0,
+  "orchestration": "native asynchronous ChiaFunction graph",
+  "pareto_count": 16,
+  "promoted_count": 16,
+  "schema_version": "chia-rdo.phase7b-search.v1",
+  "source_artifacts_sha256": {
+    "results/phase7b/pway_rtl_gate.json": "6dbf8952447ccf8c6c63af3794b1ddcf0043f7cfc43877347ea45fb9b69ad929",
+    "results/phase7b/synthesis_results.json": "fe784bbeb61fbfa5beae5d95556972031c59dc8a69be3fbeaab4d5bbe1d9af08",
+    "results/phase7b/width_analysis.json": "cdbb8f30a1b272221d055afe68436a1f3cc797a6a5189ee3af0aa040cc461593"
+  }
+}

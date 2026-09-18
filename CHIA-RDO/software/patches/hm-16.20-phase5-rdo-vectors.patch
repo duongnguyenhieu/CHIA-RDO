@@ -1,0 +1,52 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -2273,6 +2273,8 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+     UInt chiaModeBitsByMode[FAST_UDI_MAX_RDMODE_NUM];
+     Double chiaRoughCostByMode[FAST_UDI_MAX_RDMODE_NUM];
+     Double chiaRdCostByRank[FAST_UDI_MAX_RDMODE_NUM];
++    Distortion chiaDistortionByRank[FAST_UDI_MAX_RDMODE_NUM];
++    UInt chiaRateBitsByRank[FAST_UDI_MAX_RDMODE_NUM];
+     UInt chiaRqtRefinementEvaluations = 0;
+     UInt chiaRdoCandidateEvaluations = 0;
+     UInt chiaRankingCount = numModesForFullRD;
+@@ -2292,6 +2294,8 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+       chiaModeBitsByMode[i] = 0;
+       chiaRoughCostByMode[i] = MAX_DOUBLE;
+       chiaRdCostByRank[i] = MAX_DOUBLE;
++      chiaDistortionByRank[i] = 0;
++      chiaRateBitsByRank[i] = 0;
+     }
+     if (chiaControlled)
+     {
+@@ -2542,6 +2546,9 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+ #endif
+ 
+       chiaRdCostByRank[uiMode] = dPUCost;
++      chiaDistortionByRank[uiMode] = uiPUDistY;
++      const Double chiaRateBits = (dPUCost - Double(uiPUDistY)) / m_pcRdCost->getLambda();
++      chiaRateBitsByRank[uiMode] = UInt(std::floor(chiaRateBits + 0.5));
+ #if DEBUG_INTRA_SEARCH_COSTS
+       std::cout << "2nd pass [luma,chroma] mode [" << Int(pcCU->getIntraDir(CHANNEL_TYPE_LUMA, uiPartOffset)) << "," << Int(pcCU->getIntraDir(CHANNEL_TYPE_CHROMA, uiPartOffset)) << "] cost = " << dPUCost << "\n";
+ #endif
+@@ -2786,7 +2793,20 @@ TEncSearch::estIntraPredLumaQT(TComDataCU* pcCU,
+         if (i != 0) *chiaTrace << ',';
+         *chiaTrace << chiaRdCostByRank[i];
+       }
+-      *chiaTrace << "],\"best_mode\":" << uiBestPUMode
++      *chiaTrace << "],\"distortion_by_rank\":[";
++      for (UInt i = 0; i < chiaSelectedK; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaDistortionByRank[i];
++      }
++      *chiaTrace << "],\"rate_bits_by_rank\":[";
++      for (UInt i = 0; i < chiaSelectedK; i++)
++      {
++        if (i != 0) *chiaTrace << ',';
++        *chiaTrace << chiaRateBitsByRank[i];
++      }
++      *chiaTrace << "],\"lambda\":" << m_pcRdCost->getLambda()
++                 << ",\"best_mode\":" << uiBestPUMode
+                  << ",\"best_distortion\":" << uiBestPUDistY
+                  << ",\"best_rd_cost\":" << dBestPUCost << "}\n";
+     }

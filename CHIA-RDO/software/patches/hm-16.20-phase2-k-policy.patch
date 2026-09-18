@@ -1,0 +1,237 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -53,6 +53,102 @@
+   return value != NULL && std::string(value) == "1";
+ }
+ 
++enum ChiaRdoPolicy
++{
++  CHIA_RDO_STOCK,
++  CHIA_RDO_EXHAUSTIVE,
++  CHIA_RDO_FIXED,
++  CHIA_RDO_ADAPTIVE_V0
++};
++
++struct ChiaRdoPolicyConfig
++{
++  ChiaRdoPolicy policy;
++  UInt fixedK;
++  UInt highK;
++  UInt mediumK;
++  UInt lowK;
++  Double highThreshold;
++  Double mediumThreshold;
++
++  ChiaRdoPolicyConfig()
++    : policy(CHIA_RDO_STOCK), fixedK(35), highK(4), mediumK(8), lowK(16),
++      highThreshold(0.088), mediumThreshold(0.045)
++  {
++    const char *name = std::getenv("CHIA_RDO_POLICY");
++    if (name == NULL || name[0] == '\0')
++    {
++      policy = chiaRdoExhaustiveEnabled() ? CHIA_RDO_EXHAUSTIVE : CHIA_RDO_STOCK;
++      return;
++    }
++    const std::string policyName(name);
++    if (policyName == "exhaustive") policy = CHIA_RDO_EXHAUSTIVE;
++    else if (policyName == "fixed") policy = CHIA_RDO_FIXED;
++    else if (policyName == "adaptive_v0") policy = CHIA_RDO_ADAPTIVE_V0;
++    else chiaFail("CHIA_RDO_POLICY must be exhaustive, fixed, or adaptive_v0");
++
++    if (policy == CHIA_RDO_FIXED) fixedK = parseUInt("CHIA_RDO_FIXED_K", 0);
++    if (policy == CHIA_RDO_ADAPTIVE_V0)
++    {
++      highThreshold = parseDouble("CHIA_RDO_HIGH_THRESHOLD", highThreshold);
++      mediumThreshold = parseDouble("CHIA_RDO_MEDIUM_THRESHOLD", mediumThreshold);
++      highK = parseUInt("CHIA_RDO_HIGH_K", highK);
++      mediumK = parseUInt("CHIA_RDO_MEDIUM_K", mediumK);
++      lowK = parseUInt("CHIA_RDO_LOW_K", lowK);
++      if (mediumThreshold > highThreshold) chiaFail("adaptive thresholds must satisfy medium <= high");
++    }
++  }
++
++  static Void chiaFail(const char *message)
++  {
++    std::cerr << "CHIA-RDO: " << message << std::endl;
++    std::exit(EXIT_FAILURE);
++  }
++
++  static UInt parseUInt(const char *name, UInt defaultValue)
++  {
++    const char *text = std::getenv(name);
++    if ((text == NULL || text[0] == '\0') && defaultValue != 0) return defaultValue;
++    char *end = NULL;
++    const long value = text == NULL ? 0 : std::strtol(text, &end, 10);
++    if (text == NULL || text[0] == '\0' || end == NULL || end[0] != '\0' || value < 1 || value > 35)
++    {
++      chiaFail("K values must be integers in [1,35]");
++    }
++    return UInt(value);
++  }
++
++  static Double parseDouble(const char *name, Double defaultValue)
++  {
++    const char *text = std::getenv(name);
++    if (text == NULL || text[0] == '\0') return defaultValue;
++    char *end = NULL;
++    const Double value = std::strtod(text, &end);
++    if (end == NULL || end[0] != '\0' || !std::isfinite(value) || value < 0.0)
++    {
++      chiaFail("adaptive thresholds must be finite nonnegative numbers");
++    }
++    return value;
++  }
++};
++
++static const ChiaRdoPolicyConfig &chiaRdoPolicyConfig()
++{
++  static const ChiaRdoPolicyConfig config;
++  return config;
++}
++
++static const char *chiaRdoPolicyName(ChiaRdoPolicy policy)
++{
++  switch (policy)
++  {
++    case CHIA_RDO_EXHAUSTIVE: return "exhaustive";
++    case CHIA_RDO_FIXED: return "fixed";
++    case CHIA_RDO_ADAPTIVE_V0: return "adaptive_v0";
++    default: return "stock";
++  }
++}
++
+ static std::ofstream *chiaRdoTraceStream()
+ {
+   static Bool initialized = false;
+@@ -2295,7 +2391,9 @@
+ 
+     //===== determine set of modes to be tested (using prediction signal only) =====
+     Int numModesAvailable     = 35; //total number of Intra modes
+-    const Bool chiaExhaustive = chiaRdoExhaustiveEnabled();
++    const ChiaRdoPolicyConfig &chiaPolicyConfig = chiaRdoPolicyConfig();
++    const Bool chiaExhaustive = chiaPolicyConfig.policy == CHIA_RDO_EXHAUSTIVE;
++    const Bool chiaControlled = chiaPolicyConfig.policy != CHIA_RDO_STOCK;
+     UInt uiRdModeList[FAST_UDI_MAX_RDMODE_NUM];
+     Int numModesForFullRD = m_pcEncCfg->getFastUDIUseMPMEnabled()?g_aucIntraModeNumFast_UseMPM[ uiWidthBit ] : g_aucIntraModeNumFast_NotUseMPM[ uiWidthBit ];
+     Distortion chiaSatdByMode[FAST_UDI_MAX_RDMODE_NUM];
+@@ -2303,6 +2401,10 @@
+     Double chiaRoughCostByMode[FAST_UDI_MAX_RDMODE_NUM];
+     Double chiaRdCostByRank[FAST_UDI_MAX_RDMODE_NUM];
+     UInt chiaRqtRefinementEvaluations = 0;
++    UInt chiaRdoCandidateEvaluations = 0;
++    UInt chiaRankingCount = numModesForFullRD;
++    UInt chiaSelectedK = numModesForFullRD;
++    Double chiaConfidence = 0.0;
+     for (Int i = 0; i < numModesAvailable; i++)
+     {
+       chiaSatdByMode[i] = 0;
+@@ -2310,16 +2412,18 @@
+       chiaRoughCostByMode[i] = MAX_DOUBLE;
+       chiaRdCostByRank[i] = MAX_DOUBLE;
+     }
+-    if (chiaExhaustive)
++    if (chiaControlled)
+     {
+       numModesForFullRD = numModesAvailable;
++      chiaRankingCount = numModesAvailable;
++      chiaSelectedK = numModesAvailable;
+     }
+ 
+     // this should always be true
+     assert (tuRecurseWithPU.ProcessComponentSection(COMPONENT_Y));
+     initIntraPatternChType( tuRecurseWithPU, COMPONENT_Y, true DEBUG_STRING_PASS_INTO(sTemp2) );
+ 
+-    Bool doFastSearch = chiaExhaustive || (numModesForFullRD != numModesAvailable);
++    Bool doFastSearch = chiaControlled || (numModesForFullRD != numModesAvailable);
+     if (doFastSearch)
+     {
+       assert(numModesForFullRD <= numModesAvailable);
+@@ -2369,7 +2473,23 @@
+         CandNum += xUpdateCandList( uiMode, cost, numModesForFullRD, uiRdModeList, CandCostList );
+       }
+ 
+-      if (m_pcEncCfg->getFastUDIUseMPMEnabled())
++      if (chiaControlled)
++      {
++        if (chiaPolicyConfig.policy == CHIA_RDO_FIXED)
++        {
++          chiaSelectedK = chiaPolicyConfig.fixedK;
++        }
++        else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_V0)
++        {
++          const Double firstCost = chiaRoughCostByMode[uiRdModeList[0]];
++          const Double secondCost = chiaRoughCostByMode[uiRdModeList[1]];
++          chiaConfidence = firstCost > 0.0 ? (secondCost - firstCost) / firstCost : 0.0;
++          chiaSelectedK = chiaConfidence >= chiaPolicyConfig.highThreshold ? chiaPolicyConfig.highK
++                        : chiaConfidence >= chiaPolicyConfig.mediumThreshold ? chiaPolicyConfig.mediumK
++                        : chiaPolicyConfig.lowK;
++        }
++      }
++      else if (m_pcEncCfg->getFastUDIUseMPMEnabled())
+       {
+         Int uiPreds[NUM_MOST_PROBABLE_MODES] = {-1, -1, -1};
+ 
+@@ -2413,7 +2533,7 @@
+     Double     dBestPUCost   = MAX_DOUBLE;
+ 
+ #if ENVIRONMENT_VARIABLE_DEBUG_AND_TEST
+-    UInt max=numModesForFullRD;
++    UInt max=chiaSelectedK;
+ 
+     if (DebugOptionList::ForceLumaMode.isSet())
+     {
+@@ -2421,9 +2541,10 @@
+     }
+     for ( UInt uiMode = 0; uiMode < max; uiMode++)
+ #else
+-    for( UInt uiMode = 0; uiMode < numModesForFullRD; uiMode++ )
++    for( UInt uiMode = 0; uiMode < chiaSelectedK; uiMode++ )
+ #endif
+     {
++      chiaRdoCandidateEvaluations++;
+       // set luma prediction mode
+       UInt uiOrgMode = uiRdModeList[uiMode];
+ 
+@@ -2583,16 +2704,29 @@
+                  << ",\"pu_width\":" << chiaPuRect.width
+                  << ",\"pu_height\":" << chiaPuRect.height
+                  << ",\"qp\":" << Int(pcCU->getQP(uiPartOffset))
+-                 << ",\"policy\":\"" << (chiaExhaustive ? "exhaustive" : "stock") << "\""
+-                 << ",\"candidate_count\":" << numModesForFullRD
+-                 << ",\"rdo_candidate_evaluations\":" << numModesForFullRD
++                 << ",\"policy\":\"" << chiaRdoPolicyName(chiaPolicyConfig.policy) << "\""
++                 << ",\"candidate_count\":" << chiaSelectedK
++                 << ",\"rdo_candidate_evaluations\":" << chiaRdoCandidateEvaluations
+                  << ",\"rqt_refinement_evaluations\":" << chiaRqtRefinementEvaluations
+                  << ",\"ranked_modes\":[";
+-      for (Int i = 0; i < numModesForFullRD; i++)
++      for (UInt i = 0; i < chiaRankingCount; i++)
+       {
+         if (i != 0) *chiaTrace << ',';
+         *chiaTrace << uiRdModeList[i];
+       }
++      if (!chiaExhaustive && chiaControlled)
++      {
++        *chiaTrace << "],\"trace_schema\":\"chia-rdo.policy-trace.v1\""
++                   << ",\"ranking_count\":" << chiaRankingCount
++                   << ",\"selected_k\":" << chiaSelectedK
++                   << ",\"confidence\":" << chiaConfidence
++                   << ",\"evaluated_modes\":[";
++        for (UInt i = 0; i < chiaSelectedK; i++)
++        {
++          if (i != 0) *chiaTrace << ',';
++          *chiaTrace << uiRdModeList[i];
++        }
++      }
+       *chiaTrace << "],\"satd_by_mode\":[";
+       for (Int i = 0; i < numModesAvailable; i++)
+       {
+@@ -2612,7 +2746,7 @@
+         *chiaTrace << chiaRoughCostByMode[i];
+       }
+       *chiaTrace << "],\"rd_cost_by_rank\":[";
+-      for (Int i = 0; i < numModesForFullRD; i++)
++      for (UInt i = 0; i < chiaSelectedK; i++)
+       {
+         if (i != 0) *chiaTrace << ',';
+         *chiaTrace << chiaRdCostByRank[i];

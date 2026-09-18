@@ -7,6 +7,7 @@ import argparse
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -164,12 +165,15 @@ def main() -> int:
         check=False,
     )
     unit_log.write_text(unit.stdout, encoding="utf-8")
+    unit_count_match = re.search(r"Ran (\d+) tests?", unit.stdout)
     gate.check(
         "HM baseline reproducibility",
         "Run the test suite, then repeat exhaustive encode and compare immutable hashes.",
         "Tests pass and repeated bitstream/reconstruction/trace hashes match the recorded baseline.",
         str(evidence_dir.relative_to(ROOT)),
-        lambda: "4 unit tests passed" if unit.returncode == 0 else (_ for _ in ()).throw(RuntimeError("unit tests failed")),
+        lambda: (f"{unit_count_match.group(1)} unit tests passed"
+                 if unit.returncode == 0 and unit_count_match
+                 else (_ for _ in ()).throw(RuntimeError("unit tests failed"))),
     )
 
     base_env = dict(os.environ)

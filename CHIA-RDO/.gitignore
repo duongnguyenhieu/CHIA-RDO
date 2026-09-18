@@ -6,6 +6,28 @@ datasets/generated/
 # Generated experiment artifacts. Keep directory sentinels tracked.
 results/**/*
 !results/**/.gitkeep
+# Publish the compact, machine-readable evidence used by the final paper.
+!results/phase4/
+!results/phase4/analysis.json
+!results/phase4/database.csv
+!results/phase4/database.json
+!results/phase4/gate.json
+!results/phase4/pareto.json
+!results/phase7/
+!results/phase7/*.json
+!results/phase7/*.csv
+!results/phase7b/
+!results/phase7b/*.json
+!results/phase7b/*.jsonl
+!results/phase7b/experiments/
+!results/phase7b/experiments/*.json
+!results/phase7b/p1_baseline/
+!results/phase7b/p1_baseline/*.rpt
+!results/phase7b/p2_baseline/
+!results/phase7b/p2_baseline/*.rpt
+# Cloud account metadata is not required to validate the technical claims.
+results/phase7b/gcp_usage.json
+results/phase7b/gcp_smoke_manifest.json
 logs/**/*
 !logs/**/.gitkeep
 figures/**/*
@@ -15,3 +37,20 @@ figures/**/*
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# FPGA tools and editor scratch files.
+.Xil/
+*.dcp
+*.jou
+*.log
+*.str
+*.wdb
+*.xpr
+*.~lock.*#
+cong/
+clockInfo.txt
+iter_*_CongestedCLBsAndNets.txt
+tight_setup_hold_pins.txt
+
+# Local cloud-account snapshots are not part of the public artifact.
+cloud/gcp_phase6_budget.json

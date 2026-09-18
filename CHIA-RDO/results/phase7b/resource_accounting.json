@@ -1,0 +1,81 @@
+{
+  "schema_version": "chia-rdo.phase7b-resource-accounting.v1",
+  "target": {
+    "part": "xck26-sfvc784-2LV-c",
+    "flow": "Vivado 2024.2 out-of-context top-level synthesis/implementation",
+    "available": {
+      "clb_lut": 117120,
+      "clb_register": 234240,
+      "dsp48e2": 1248,
+      "bram_tile": 144,
+      "uram": 64,
+      "carry8": 14640
+    },
+    "internal_budget_70_percent": {
+      "clb_lut": 81984,
+      "clb_register": 163968,
+      "dsp48e2": 873,
+      "bram_tile": 100,
+      "uram": 44,
+      "carry8": 10248
+    }
+  },
+  "baselines": [
+    {
+      "p": 1,
+      "report_stage": "route",
+      "clb_lut": 36454,
+      "clb_register": 1714,
+      "dsp48e2": 178,
+      "bram_tile": 0,
+      "uram": 0,
+      "carry8": 3653,
+      "placement": "PASS",
+      "routing": "PASS",
+      "timing": "FAIL",
+      "wns_ns": -60.395,
+      "fmax_mhz": 15.291688967046408
+    },
+    {
+      "p": 2,
+      "report_stage": "route",
+      "clb_lut": 70817,
+      "clb_register": 1913,
+      "dsp48e2": 356,
+      "bram_tile": 0,
+      "uram": 0,
+      "carry8": 7326,
+      "placement": "PASS",
+      "routing": "PASS",
+      "timing": "FAIL",
+      "wns_ns": -64.653,
+      "fmax_mhz": 14.356883407749844
+    },
+    {
+      "p": 4,
+      "report_stage": "synthesis",
+      "clb_lut": 140102,
+      "clb_register": 2221,
+      "dsp48e2": 712,
+      "bram_tile": 0,
+      "uram": 0,
+      "carry8": 14665,
+      "placement": "FAIL",
+      "routing": "NOT_RUN",
+      "timing": "NOT_AVAILABLE",
+      "wns_ns": null,
+      "fmax_mhz": null,
+      "place_drc": {
+        "lut_as_logic_required": 139452,
+        "lut_as_logic_available": 117120,
+        "carry8_required": 14649,
+        "carry8_available": 14640
+      }
+    }
+  ],
+  "accounting_correction": {
+    "incorrect_source": "logical primitive counts from get_cells REF_NAME patterns",
+    "authoritative_source": "Vivado report_utilization Used column",
+    "previous_logical_counts_preserved_in": "results/phase7/vivado_results.json:logical_cell_counts"
+  }
+}

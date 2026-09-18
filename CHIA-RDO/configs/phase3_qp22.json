@@ -1,0 +1,8 @@
+{
+  "schema_version": "chia-rdo.experiment-config.v1",
+  "name": "tiny64-all-intra-full-rdo-qp22",
+  "policy": "exhaustive",
+  "qp": 22,
+  "frame_rate_hz": 30,
+  "sequence": {"name": "tiny-64x64-4f-yuv420p8", "generator": "tiny-yuv-v1", "width": 64, "height": 64, "frames": 4, "bit_depth": 8, "chroma_format": "420"}
+}

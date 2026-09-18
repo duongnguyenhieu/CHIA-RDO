@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from generate_sequence import TINY64_SHA256, write_tiny_sequence
+from generate_sequence import TINY64_SHA256, write_sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -194,9 +194,11 @@ def main() -> None:
 
     sequence = config["sequence"]
     input_path = ROOT / "datasets" / "generated" / f"{sequence['name']}.yuv"
-    sequence_hash = write_tiny_sequence(
-        input_path, sequence["width"], sequence["height"], sequence["frames"]
+    sequence_hash = write_sequence(
+        input_path, sequence["width"], sequence["height"], sequence["frames"], sequence["generator"]
     )
+    if sequence.get("expected_sha256") and sequence_hash != sequence["expected_sha256"]:
+        raise RuntimeError(f"generated sequence hash does not match the locked corpus: {sequence_hash}")
     is_tiny64_fixture = (
         sequence["width"] == 64
         and sequence["height"] == 64
@@ -279,8 +281,8 @@ def main() -> None:
             "wall_time_seconds": measure_wall,
             "trace_wall_time_seconds": trace_wall,
             "hm_cpu_time_seconds": metrics.pop("hm_cpu_time_seconds"),
-            "cloud_backend": None,
-            "cloud_cost_usd": 0.0,
+            "cloud_backend": os.environ.get("CHIA_RDO_CLOUD_BACKEND"),
+            "cloud_cost_usd": None if os.environ.get("CHIA_RDO_CLOUD_BACKEND") else 0.0,
             "replicate": args.replicate or None,
         },
         "metrics": {**metrics, **trace_summary, "bd_rate_percent": None},

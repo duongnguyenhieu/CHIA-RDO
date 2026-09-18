@@ -1,0 +1,236 @@
+{
+  "candidate_count": 10000,
+  "candidate_jsonl_sha256": "ec92c7fe959a125f08c8aeba4ef25c01598c5b40048e3eedfee6dcd04a222b89",
+  "candidate_set": [
+    0,
+    1,
+    10,
+    26
+  ],
+  "created_utc": "2026-09-11T01:25:02.444311Z",
+  "group_count": 2500,
+  "group_jsonl_sha256": "d470e0378c945a6d8f9519020e3f99526bab16009a6466563d20a490ab6c1dde",
+  "hm_double_vs_q16_winner_disagreements": 0,
+  "hm_revision": "22178e370178133438c0339f57b3b3a29f112909",
+  "mode_counts": {
+    "0": 2500,
+    "1": 2500,
+    "10": 2500,
+    "26": 2500
+  },
+  "oracle_validation": "exact integer match at every codec stage before emission",
+  "qp_counts": {
+    "22": 2500,
+    "27": 2500,
+    "32": 2500,
+    "37": 2500
+  },
+  "qps": [
+    22,
+    27,
+    32,
+    37
+  ],
+  "quantized_range": [
+    -71,
+    84
+  ],
+  "rate_scope": "exact HM xGetIntraBitsQT count supplied to RTL; no hardware CABAC estimator",
+  "schema_version": "chia-rdo.full-rdo-pe-vectors.v1",
+  "source_class_counts": {
+    "edge-heavy": 2048,
+    "random": 2048,
+    "smooth": 2064,
+    "texture-heavy": 2048,
+    "worst-case-signed": 1792
+  },
+  "supported_block_sizes": [
+    4
+  ],
+  "traces": [
+    {
+      "available_groups": 972,
+      "bitstream_sha256": "0f009fe98440d06bff4d2c150df301309f7a4fdbee1f72b49691dce863ed4f5d",
+      "qp": 22,
+      "selected_groups": 129,
+      "source_class": "smooth",
+      "source_sha256": "3fa0f86d3161ff0767d6396cd03631837778e4acc1605f08dbab0247f75c98d1",
+      "trace_sha256": "955ad04b378faad8adf216417efac61b357a57348ef2f46e10d8faf78e966b28"
+    },
+    {
+      "available_groups": 824,
+      "bitstream_sha256": "404e2ecdd5b8f0b7ed66b027ce17559f74d3b58da0ce1ea909bdf9f862dd6d66",
+      "qp": 22,
+      "selected_groups": 128,
+      "source_class": "edge-heavy",
+      "source_sha256": "bdfc5bc326c7877579e15fce16dc59441de3af3aa7d7b9c7f57b44defd7cfc37",
+      "trace_sha256": "e10217a27adcc45a4fae30ef6e2d84c6d5e5fba2181fd383ca2e9dc029742d92"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "117567445775d0adc4d1bb099fefd34a60e1d2d5d003ba3facc43b8a362b2533",
+      "qp": 22,
+      "selected_groups": 128,
+      "source_class": "texture-heavy",
+      "source_sha256": "bc8314a3ce1ed0a80994ccf55e5cc930033f9bba4a959651201a8571874a392c",
+      "trace_sha256": "8a3beab595628dcb9458c60d81aeb5db37dfb4142d087ef85f1d9a683571e665"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "35000f27ede0f630db76c403a75f894ff7af170a3ee2b44709d698f5b1e1b226",
+      "qp": 22,
+      "selected_groups": 128,
+      "source_class": "random",
+      "source_sha256": "2d97a6950a0a985343382d2bc070a67105625a515bbd44147a68050c06ee315e",
+      "trace_sha256": "95f2693bd872a82311cf4e09bc9b553f5313c947dec80d3a413ed1428a20555d"
+    },
+    {
+      "available_groups": 112,
+      "bitstream_sha256": "a76971cec8a1e0b9700c22b4063be27207bf898ae29a220332136498a1a22c59",
+      "qp": 22,
+      "selected_groups": 112,
+      "source_class": "worst-case-signed",
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "06076ac6c42e29119dd110dac93b87896589a88e45b65016a50c51172e394285"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "f056ad3161b10b24d1dbe4956f93df8627e71200c7484f6987fc0c4e738ce47e",
+      "qp": 27,
+      "selected_groups": 129,
+      "source_class": "smooth",
+      "source_sha256": "3fa0f86d3161ff0767d6396cd03631837778e4acc1605f08dbab0247f75c98d1",
+      "trace_sha256": "3172290e530d93bfa85447e0b1be26133c03518e14310939899cbea013e02f4b"
+    },
+    {
+      "available_groups": 898,
+      "bitstream_sha256": "9cd756c461ad0f0a3d4653f48d9ea831c3183318a87a7eea7c248d95b6122532",
+      "qp": 27,
+      "selected_groups": 128,
+      "source_class": "edge-heavy",
+      "source_sha256": "bdfc5bc326c7877579e15fce16dc59441de3af3aa7d7b9c7f57b44defd7cfc37",
+      "trace_sha256": "3269ae4d960c05dc7b16fcedead29238ba0309ac6ccc200bd44bad15ee19c407"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "862d67d487b9c357c88c2d3e00f7aa9741cc195ad120e06b5ccf9d165cbd4453",
+      "qp": 27,
+      "selected_groups": 128,
+      "source_class": "texture-heavy",
+      "source_sha256": "bc8314a3ce1ed0a80994ccf55e5cc930033f9bba4a959651201a8571874a392c",
+      "trace_sha256": "7604e31de681d7a30aefdd924ecedf55cd49c572839c25de82813a2a7afe0954"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "3b5cd2aa494ae7dc81ded00f17fb0f5b8030588a8c0502671c67224a0d0fef8c",
+      "qp": 27,
+      "selected_groups": 128,
+      "source_class": "random",
+      "source_sha256": "2d97a6950a0a985343382d2bc070a67105625a515bbd44147a68050c06ee315e",
+      "trace_sha256": "f621e934c7900e4ea07bd3344a44370ac70da06781ffb947e33e5cba5e6225f5"
+    },
+    {
+      "available_groups": 218,
+      "bitstream_sha256": "9b2ca9293ab59efb07bb94f61a336b189adb2c108ffae1ab4770ad6527678ba6",
+      "qp": 27,
+      "selected_groups": 112,
+      "source_class": "worst-case-signed",
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "842896f2adf994fedaef3015361e416ef7b949f8b13ea5dcd702e704405d7c2f"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "e639d97cee2f2c8186d2fb1d2ca9b8c7aed137a0d3866c0a48c9e74082040e1f",
+      "qp": 32,
+      "selected_groups": 129,
+      "source_class": "smooth",
+      "source_sha256": "3fa0f86d3161ff0767d6396cd03631837778e4acc1605f08dbab0247f75c98d1",
+      "trace_sha256": "1b39c1550315941c32662f39d2598590e84bee3014ec81add856eae9a8fed836"
+    },
+    {
+      "available_groups": 970,
+      "bitstream_sha256": "4e2896270d3670914802aa86b7e68aa88a9c5d9559e79dd182d09c1ce31f7ba4",
+      "qp": 32,
+      "selected_groups": 128,
+      "source_class": "edge-heavy",
+      "source_sha256": "bdfc5bc326c7877579e15fce16dc59441de3af3aa7d7b9c7f57b44defd7cfc37",
+      "trace_sha256": "1d4e9cb4a499e020916f27a3e00ac6d41b0bfd0aabac6d9131753345851c9ef9"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "ee7e4a61845f8b022dea3a6b04095d4b581c59aa202f3b6312fff0628d96f4f6",
+      "qp": 32,
+      "selected_groups": 128,
+      "source_class": "texture-heavy",
+      "source_sha256": "bc8314a3ce1ed0a80994ccf55e5cc930033f9bba4a959651201a8571874a392c",
+      "trace_sha256": "ae2ee1e4579b5514525a3c608b696e3b2ca2c9261e4b45c737fd9d7c5bb850ce"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "d08dabbff606e0cbe96fc9cc098c146e47e6d6f8ba88989e25c6e5c900355fa7",
+      "qp": 32,
+      "selected_groups": 128,
+      "source_class": "random",
+      "source_sha256": "2d97a6950a0a985343382d2bc070a67105625a515bbd44147a68050c06ee315e",
+      "trace_sha256": "6f52dafa0f96ced18af71d9e14528390c07e2e02fefefa8b2cdbfe258e960b76"
+    },
+    {
+      "available_groups": 172,
+      "bitstream_sha256": "60c596fb0636c5184697363fefec0edcf50d93aa80721f225f9de3bf2b345f42",
+      "qp": 32,
+      "selected_groups": 112,
+      "source_class": "worst-case-signed",
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "13d28062a6bf252991259d3eb046241baaf75f6fcc455c7785908234aacf5d3f"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "d451df14899ce5b2d57737de5d7c09ab31af167e37ad8b29aacc51f6d768ee3f",
+      "qp": 37,
+      "selected_groups": 129,
+      "source_class": "smooth",
+      "source_sha256": "3fa0f86d3161ff0767d6396cd03631837778e4acc1605f08dbab0247f75c98d1",
+      "trace_sha256": "2cf3013009a44e7637a00a88858befd36322cc8624eaa91a7f9c29499c845146"
+    },
+    {
+      "available_groups": 948,
+      "bitstream_sha256": "fb5e3cd0b9d8f7ebea9f599606282f97b3b46b94b6887835602d060ccf159b6c",
+      "qp": 37,
+      "selected_groups": 128,
+      "source_class": "edge-heavy",
+      "source_sha256": "bdfc5bc326c7877579e15fce16dc59441de3af3aa7d7b9c7f57b44defd7cfc37",
+      "trace_sha256": "b95419928aec22116318ab6832eefe3d38fb1bd553e45d177460b0a3c21edcd1"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "8be2232da934d42a48d6e3f0573e9e5a98d519044ec6876fd979f2bbf9b4e55b",
+      "qp": 37,
+      "selected_groups": 128,
+      "source_class": "texture-heavy",
+      "source_sha256": "bc8314a3ce1ed0a80994ccf55e5cc930033f9bba4a959651201a8571874a392c",
+      "trace_sha256": "a1131e7ef4c82d3248e142dbeb5f7f64ad0987be3031d09f9dfc763b60b23ea1"
+    },
+    {
+      "available_groups": 1024,
+      "bitstream_sha256": "d90a5e00ea1868efe7f3f3c07013c40d6e0ab451fb8940730341c5bc8517fea6",
+      "qp": 37,
+      "selected_groups": 128,
+      "source_class": "random",
+      "source_sha256": "2d97a6950a0a985343382d2bc070a67105625a515bbd44147a68050c06ee315e",
+      "trace_sha256": "91bb5fbd3b654be0bb93eaf6547c1498ba1132141a14a997ace6225b93549f03"
+    },
+    {
+      "available_groups": 338,
+      "bitstream_sha256": "ba5140e3e18b98e3ca79efaa5a9ed48fed3df2bc114fead2e6d7755b694f07e0",
+      "qp": 37,
+      "selected_groups": 112,
+      "source_class": "worst-case-signed",
+      "source_sha256": "fc4367dbc8ea9f11118e54b8cc9a702f80118c8a09e950e85b0b4e4e37c13a11",
+      "trace_sha256": "ff51aaa6ee9d0a2c2940dff5b895cf2e06e2ebd585b4493b7e4ed1a19f2736cd"
+    }
+  ],
+  "transform_range": [
+    -18260,
+    21654
+  ]
+}

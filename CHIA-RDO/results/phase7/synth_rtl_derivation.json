@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-09-12T09:38:02.911412Z",
+  "derived": "build/phase7/generated/full_rdo_codec_4x4.sv",
+  "derived_sha256": "f9b00974909c17f1e745fb262d7caaab6a72159c14983b7ca2263b5587b8c4d8",
+  "equivalence_status": "PENDING_RTL_REGRESSION",
+  "locked_source_modified": false,
+  "schema_version": "chia-rdo.phase7-synth-rtl-derivation.v1",
+  "source": "rtl/full_rdo_codec_4x4.sv",
+  "source_sha256": "46002cdda965834e9e9b136e3c6a6d9a85a70278032b43195828bb38b7492b21",
+  "transformation": "Bound the negative-angle reference extension loop to -1..-4 and preserve the original runtime condition as a guard."
+}

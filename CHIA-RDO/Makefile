@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: environment hm dataset baseline phase1-gate test
+.PHONY: environment hm dataset baseline phase1-gate fixed-pilot adaptive-pilot test
 
 environment:
 	$(PYTHON) --version
@@ -18,6 +18,12 @@ baseline: hm
 
 phase1-gate: baseline
 	$(PYTHON) scripts/validate_phase1.py
+
+fixed-pilot:
+	for k in 2 4 8 16 35; do $(PYTHON) software/run_policy.py --policy fixed --k $$k; done
+
+adaptive-pilot:
+	$(PYTHON) software/run_policy.py --policy adaptive_v0
 
 test:
 	$(PYTHON) -m unittest discover -s tests -v

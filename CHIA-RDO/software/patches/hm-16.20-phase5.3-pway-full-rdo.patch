@@ -1,0 +1,12 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -1429,8 +1429,7 @@ Void TEncSearch::xIntraCodingTUBlock(       TComYuv*    pcOrgYuv,
+   const UInt           uiChCodedMode    = (uiChPredMode==DM_CHROMA_IDX && !bIsLuma) ? pcCU->getIntraDir(CHANNEL_TYPE_LUMA, getChromasCorrespondingPULumaIdx(uiAbsPartIdx, chFmt, partsPerMinCU)) : uiChPredMode;
+   const UInt           uiChFinalMode    = ((chFmt == CHROMA_422)       && !bIsLuma) ? g_chroma422IntraAngleMappingTable[uiChCodedMode] : uiChCodedMode;
+   std::ofstream *chiaFullRdoTrace = chiaFullRdoTraceStream();
+-  const Bool chiaSupportedMode = uiChFinalMode == PLANAR_IDX || uiChFinalMode == DC_IDX
+-                              || uiChFinalMode == HOR_IDX || uiChFinalMode == VER_IDX;
++  const Bool chiaSupportedMode = uiChFinalMode <= 34;
+   const Bool chiaCaptureFullRdo = chiaFullRdoTrace != NULL && bIsLuma && uiWidth == 4 && uiHeight == 4
+                                && chiaSupportedMode && !useTransformSkip;
+   Pel chiaOriginal[16] = {0};

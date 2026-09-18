@@ -1,0 +1,1 @@
+{"schema_version":"chia-rdo.experiment-config.v1","name":"synthetic128-all-intra-full-rdo-qp37","policy":"exhaustive","qp":37,"frame_rate_hz":30,"sequence":{"name":"synthetic-128x128-8f-yuv420p8","generator":"tiny-yuv-v1","width":128,"height":128,"frames":8,"bit_depth":8,"chroma_format":"420"}}

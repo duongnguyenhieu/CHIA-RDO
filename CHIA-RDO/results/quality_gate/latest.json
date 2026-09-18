@@ -2,7 +2,7 @@
   "baseline_result": "results/baseline/tiny64-all-intra-full-rdo-qp32-faed5f414b11/result.json",
   "baseline_trace": "results/baseline/tiny64-all-intra-full-rdo-qp32-faed5f414b11/intra-rdo.jsonl",
   "cloud_cost_usd": 0.0,
-  "created_utc": "2026-09-08T10:51:52.979944Z",
+  "created_utc": "2026-09-09T17:32:50.133270Z",
   "limitations": [
     "HHI_RQT_INTRA_SPEEDUP remains enabled; candidate-loop coverage is exhaustive but transform-tree refinement follows stock HM.",
     "Trace events describe evaluated search alternatives, not only coding-tree units committed to the final bitstream.",
@@ -12,7 +12,7 @@
     "annex_b_kbps": 195.06,
     "bitstream_bytes": 3251,
     "encoded_frames": 4,
-    "hm_cpu_time_seconds": 0.462,
+    "hm_cpu_time_seconds": 0.242,
     "hm_summary_kbps": 195.06,
     "pictures": [
       {
@@ -70,8 +70,8 @@
   "status": "PASS",
   "tests": [
     {
-      "actual": "4 unit tests passed",
-      "evidence_path": "results/quality_gate/20260908T105151Z",
+      "actual": "17 unit tests passed",
+      "evidence_path": "results/quality_gate/20260909T173249Z",
       "expected": "Tests pass and repeated bitstream/reconstruction/trace hashes match the recorded baseline.",
       "method": "Run the test suite, then repeat exhaustive encode and compare immutable hashes.",
       "status": "PASS",
@@ -79,7 +79,7 @@
     },
     {
       "actual": "all 1364 rankings match stable rough-cost order and cover modes 0..34",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "Every search call covers all 35 modes exactly once.",
       "method": "Validate every ranked_modes vector as a permutation of HEVC luma modes 0..34.",
       "status": "PASS",
@@ -87,7 +87,7 @@
     },
     {
       "actual": "1344/1364 rows have mode-dependent SATD; all rows satisfy rough-cost identity",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "All feature vectors satisfy the HM rough-cost identity; non-boundary content has mode variation.",
       "method": "Check nonnegative SATD and rough_cost = SATD + mode_bits * sqrt(lambda) per search call.",
       "status": "PASS",
@@ -95,7 +95,7 @@
     },
     {
       "actual": "all 1364 rankings match stable rough-cost order and cover modes 0..34",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "All recorded rankings exactly match reconstructed stable order.",
       "method": "Reconstruct stable ordering from rough_cost_by_mode and compare every rank.",
       "status": "PASS",
@@ -103,7 +103,7 @@
     },
     {
       "actual": "all 1364 RD vectors are finite; each recorded winner is a tested candidate",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "All candidate RD vectors and winners satisfy invariants.",
       "method": "Check finite/nonnegative costs, candidate membership, and winner cost invariant.",
       "status": "PASS",
@@ -111,7 +111,7 @@
     },
     {
       "actual": "47740 = 1364 * 35",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "RDO evaluations equal search_calls * 35.",
       "method": "Sum per-event candidate evaluations and compare with event_count * 35.",
       "status": "PASS",
@@ -119,7 +119,7 @@
     },
     {
       "actual": "1364 refinements for 1364 calls",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "Exactly one winner refinement is recorded per search call.",
       "method": "Check each event's refinement counter under stock HHI_RQT_INTRA_SPEEDUP behavior.",
       "status": "PASS",
@@ -127,7 +127,7 @@
     },
     {
       "actual": "9695e6606861cc58de4398bfe70b4b894010ea6a377a8c7adf64db3f9752d606",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-decoded.yuv",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-decoded.yuv",
       "expected": "Encoder reconstruction and decoder output hashes are identical.",
       "method": "Decode the repeated bitstream with HM decoder and compare SHA-256.",
       "status": "PASS",
@@ -135,7 +135,7 @@
     },
     {
       "actual": "68de30e7f7ca39f8df9fb412a3c38f31b54aadc063791876525ea94a700d4a45",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-exhaustive.bin",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-exhaustive.bin",
       "expected": "68de30e7f7ca39f8df9fb412a3c38f31b54aadc063791876525ea94a700d4a45",
       "method": "Compare repeated encode SHA-256 with the previously recorded baseline.",
       "status": "PASS",
@@ -143,7 +143,7 @@
     },
     {
       "actual": "56f12bb400649ea148f2bae06cbf63ea4eb31f915c34dd60fdef2dd761cca7fd",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-exhaustive.log",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-exhaustive.log",
       "expected": "Repeated parser output and JSONL trace are byte-identical.",
       "method": "Parse the same log twice and compare trace SHA-256 with the recorded baseline.",
       "status": "PASS",
@@ -151,7 +151,7 @@
     },
     {
       "actual": "all 1364 RD vectors are finite; each recorded winner is a tested candidate",
-      "evidence_path": "results/quality_gate/20260908T105151Z/repeat-intra-rdo.jsonl",
+      "evidence_path": "results/quality_gate/20260909T173249Z/repeat-intra-rdo.jsonl",
       "expected": "Every trace event identifies an executed candidate-loop winner; final coding-tree commitment remains out of scope.",
       "method": "Require each winner to be in its executed list and final best cost not exceed first-pass minimum.",
       "status": "PASS",
@@ -159,7 +159,7 @@
     },
     {
       "actual": "af27f0269993d15d1e177965a6ea8571c8cdfbd2c9633c896151c8470ad48f4a",
-      "evidence_path": "results/quality_gate/20260908T105151Z",
+      "evidence_path": "results/quality_gate/20260909T173249Z",
       "expected": "Bitstream, reconstruction, and parsed coding metrics are identical.",
       "method": "Build pristine HM-16.20 and compare stock encode against patched HM with CHIA variables unset.",
       "status": "PASS",

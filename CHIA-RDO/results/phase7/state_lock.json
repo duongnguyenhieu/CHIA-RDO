@@ -1,0 +1,20 @@
+{
+  "created_utc": "2026-09-12T08:58:06.634986Z",
+  "git_commit": "03c33138c7b1686b83cc7627d54808cd972b3bc9",
+  "git_dirty": true,
+  "phase6_artifacts": {
+    "experiments/phase6_manifest.json": "82ec3ecc0850b7a15286ac7ba1739f0acd2a5e070c3035fcac2e48e4c723caa6",
+    "reports/phase6_dse.md": "0894f788b82e1a0679943aaeb9c34ec4563e6ee3508ebfd1e8041ff15267cc39",
+    "reports/phase6_gate.md": "250ead6e5c39e578300145e940a25cfb8e4eebe866873dce32c730492f46e90f",
+    "reports/phase6_model_correlation.md": "2b52c37b064375624e4164c78466322bb684dc0e7996135b178aff8babb806bb",
+    "reports/phase6_pareto.md": "a35156e6019d85518d044b87ecf4a47efff8b0eb244eda63c2b0a0a8fbe86e04",
+    "results/phase6/pareto/policy_pareto.json": "daa012785a1c805951cea3f9d63ee7de9cb45006a31c75b79eefa81ed55a3061",
+    "results/phase6/rtl_k_levels.json": "ebccceef8d0ad74d4f7cff61e80a407c66fd3b5c4e92af57e6110631129e4091",
+    "results/phase6/summaries/local_dse.json": "ca12a8bf64caa478d9e96a67c632b24e3b13cf34c0a5ecf597bc064bf40ef544"
+  },
+  "phase6_experiment_file_count": 114,
+  "phase6_experiments_tree_sha256": "f2ffa17904228ee927f0121524a96f2b4dd3523eb2554354dd66bb6c4b05fb6b",
+  "phase6_hm_file_count": 11,
+  "phase6_hm_tree_sha256": "7b7f9b3da716748675410772c9e7366209418fc18f4cf58b7defb603f69345ec",
+  "schema_version": "chia-rdo.phase7-state-lock.v1"
+}

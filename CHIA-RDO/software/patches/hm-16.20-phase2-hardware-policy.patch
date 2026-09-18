@@ -1,0 +1,96 @@
+--- a/source/Lib/TLibEncoder/TEncSearch.cpp
++++ b/source/Lib/TLibEncoder/TEncSearch.cpp
+@@ -58,5 +58,6 @@
+   CHIA_RDO_STOCK,
+   CHIA_RDO_EXHAUSTIVE,
+   CHIA_RDO_FIXED,
+-  CHIA_RDO_ADAPTIVE_V0
++  CHIA_RDO_ADAPTIVE_V0,
++  CHIA_RDO_ADAPTIVE_HW
+ };
+@@ -68,9 +69,10 @@
+   UInt highK;
+   UInt mediumK;
+   UInt lowK;
++  UInt parallelism;
+   Double highThreshold;
+   Double mediumThreshold;
+ 
+   ChiaRdoPolicyConfig()
+-    : policy(CHIA_RDO_STOCK), fixedK(35), highK(4), mediumK(8), lowK(16),
++    : policy(CHIA_RDO_STOCK), fixedK(35), highK(4), mediumK(8), lowK(16), parallelism(1),
+       highThreshold(0.088), mediumThreshold(0.045)
+@@ -85,8 +87,9 @@
+     if (policyName == "exhaustive") policy = CHIA_RDO_EXHAUSTIVE;
+     else if (policyName == "fixed") policy = CHIA_RDO_FIXED;
+     else if (policyName == "adaptive_v0") policy = CHIA_RDO_ADAPTIVE_V0;
+-    else chiaFail("CHIA_RDO_POLICY must be exhaustive, fixed, or adaptive_v0");
++    else if (policyName == "adaptive_hw") policy = CHIA_RDO_ADAPTIVE_HW;
++    else chiaFail("CHIA_RDO_POLICY must be exhaustive, fixed, adaptive_v0, or adaptive_hw");
+ 
+     if (policy == CHIA_RDO_FIXED) fixedK = parseUInt("CHIA_RDO_FIXED_K", 0);
+-    if (policy == CHIA_RDO_ADAPTIVE_V0)
++    if (policy == CHIA_RDO_ADAPTIVE_V0 || policy == CHIA_RDO_ADAPTIVE_HW)
+     {
+@@ -96,4 +99,12 @@
+       mediumK = parseUInt("CHIA_RDO_MEDIUM_K", mediumK);
+       lowK = parseUInt("CHIA_RDO_LOW_K", lowK);
+       if (mediumThreshold > highThreshold) chiaFail("adaptive thresholds must satisfy medium <= high");
++      if (policy == CHIA_RDO_ADAPTIVE_HW)
++      {
++        parallelism = parseUInt("CHIA_RDO_P", 0);
++        if (parallelism != 1 && parallelism != 2 && parallelism != 4 && parallelism != 8)
++        {
++          chiaFail("CHIA_RDO_P must be one of 1,2,4,8");
++        }
++      }
+     }
+@@ -145,4 +156,5 @@
+     case CHIA_RDO_EXHAUSTIVE: return "exhaustive";
+     case CHIA_RDO_FIXED: return "fixed";
+     case CHIA_RDO_ADAPTIVE_V0: return "adaptive_v0";
++    case CHIA_RDO_ADAPTIVE_HW: return "adaptive_hw";
+     default: return "stock";
+@@ -2479,5 +2492,5 @@
+         {
+           chiaSelectedK = chiaPolicyConfig.fixedK;
+         }
+-        else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_V0)
++        else if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_V0 || chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW)
+         {
+@@ -2487,4 +2499,16 @@
+           chiaSelectedK = chiaConfidence >= chiaPolicyConfig.highThreshold ? chiaPolicyConfig.highK
+                         : chiaConfidence >= chiaPolicyConfig.mediumThreshold ? chiaPolicyConfig.mediumK
+                         : chiaPolicyConfig.lowK;
++          if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW)
++          {
++            const UInt levels[5] = {2, 4, 8, 16, 35};
++            const UInt baseBatches = (chiaSelectedK + chiaPolicyConfig.parallelism - 1) / chiaPolicyConfig.parallelism;
++            for (UInt level = 0; level < 5; level++)
++            {
++              if ((levels[level] + chiaPolicyConfig.parallelism - 1) / chiaPolicyConfig.parallelism <= baseBatches)
++              {
++                chiaSelectedK = levels[level];
++              }
++            }
++          }
+         }
+@@ -2726,4 +2750,18 @@
+           if (i != 0) *chiaTrace << ',';
+           *chiaTrace << uiRdModeList[i];
+         }
++        if (chiaPolicyConfig.policy == CHIA_RDO_ADAPTIVE_HW)
++        {
++          *chiaTrace << "],\"base_k\":" << (chiaConfidence >= chiaPolicyConfig.highThreshold ? chiaPolicyConfig.highK
++                                                       : chiaConfidence >= chiaPolicyConfig.mediumThreshold ? chiaPolicyConfig.mediumK
++                                                       : chiaPolicyConfig.lowK)
++                     << ",\"parallelism_p\":" << chiaPolicyConfig.parallelism
++                     << ",\"batch_count\":" << ((chiaSelectedK + chiaPolicyConfig.parallelism - 1) / chiaPolicyConfig.parallelism)
++                     << ",\"hardware_evaluated_modes\":[";
++          for (UInt i = 0; i < chiaSelectedK; i++)
++          {
++            if (i != 0) *chiaTrace << ',';
++            *chiaTrace << uiRdModeList[i];
++          }
++        }
+       }

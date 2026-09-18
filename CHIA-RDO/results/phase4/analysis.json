@@ -1,0 +1,43 @@
+{
+  "adaptive_threshold_acceptance": {
+    "aggregate_bd_rate": true,
+    "aggregate_winner_retention": true,
+    "per_workload_bd_rate": true,
+    "per_workload_winner_retention": true,
+    "positive_rdo_reduction": true
+  },
+  "adaptive_threshold_by_workload": [
+    {
+      "avg_k": 30.117088220918866,
+      "bd_rate_percent": -0.012670532943204194,
+      "rdo_reduction": 0.13951176511660385,
+      "winner_retention": 0.9857343597262952,
+      "workload": "phase4-mixed-texture-192x128-4f-yuv420p8"
+    },
+    {
+      "avg_k": 30.344116927592957,
+      "bd_rate_percent": 0.009318262054613946,
+      "rdo_reduction": 0.1330252306402013,
+      "winner_retention": 0.9994496086105675,
+      "workload": "phase4-repetitive-128x96-4f-yuv420p8"
+    },
+    {
+      "avg_k": 4.423189823874756,
+      "bd_rate_percent": -0.07334211166177829,
+      "rdo_reduction": 0.8736231478892927,
+      "winner_retention": 0.952054794520548,
+      "workload": "phase4-smooth-edges-96x64-4f-yuv420p8"
+    }
+  ],
+  "generalization": "LIMITED",
+  "missed_winner_events": 868,
+  "schema_version": "chia-rdo.phase4-analysis.v1",
+  "selections": {
+    "balanced": "fixed_k16",
+    "final_policy": "adaptive_threshold",
+    "quality_optimal": "adaptive_threshold",
+    "speed_optimal": "fixed_k2"
+  },
+  "standard_hevc_corpus": false,
+  "status": "PASS"
+}
