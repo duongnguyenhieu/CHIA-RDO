@@ -116,64 +116,65 @@ hardware.
         history supporting replay and claim auditing.
 \end{enumerate}
 
-\tightsection{2. Adaptive-$K$ Contract}
-For mode $m$, HM instrumentation forms the stable ranking
-\begin{equation}
-  C_{\mathrm{rough}}[m]=\mathrm{SATD}[m]
-      +\mathrm{bits}[m]\sqrt{\lambda}.
-\end{equation}
-Our Full-RDO anchor evaluates all 35 ranked modes.  The frozen
-\texttt{adaptive-threshold.v1} normalizes the minimum rough cost by luma block
-area and sample range, then chooses
-\begin{equation}
-K=\begin{cases}
-4,&\widehat C_{\min}\le 0.04,\\
-16,&0.04<\widehat C_{\min}\le 0.20,\\
-35,&\widehat C_{\min}>0.20.
-\end{cases}
-\end{equation}
-The controller does not consume $P$, scheduler state, QP, or activity.  This
-separation prevents hardware exploration from silently changing the selected
-software policy.  Relative-SATD and hardware-aware variants receive distinct
-experiment versions rather than being folded into the frozen controller.
+\tightsection{2. Adaptive-$K$ Algorithm and Contract}
+The policy treats a low normalized best rough cost as evidence that one mode
+already predicts the block well, so a short expensive-RDO prefix is sufficient;
+ambiguous blocks retain more candidates.  For each luma PU it executes:
+\begin{center}
+\fcolorbox{blue}{cyan}{\begin{minipage}{0.91\linewidth}
+\footnotesize
+\textbf{Adaptive-threshold.v1}\par
+1. For every mode $m=0,\ldots,34$, compute
+$C[m]=\mathrm{SATD}[m]+\mathrm{bits}[m]\sqrt{\lambda}$.\par
+2. Stable-sort modes by increasing $C$; equal costs retain lower mode ID.\par
+3. Compute
+$\widehat C_{\min}=\min_m C[m]/\{WH(2^{b}-1)\}$ for PU size $W\!\times\!H$
+and luma bit depth $b$.\par
+4. Select $K=4$ if $\widehat C_{\min}\le0.04$, $K=16$ if
+$0.04<\widehat C_{\min}\le0.20$, and $K=35$ otherwise.\par
+5. Run candidate RDO on exactly the first $K$ ranked modes; an exact RD-cost
+tie retains the earlier stable rank.
+\end{minipage}}
+\end{center}
+Unlike our earlier confidence-gap and relative-SATD candidates, this rule uses
+an absolute rough-cost difficulty measure normalized across PU area and sample
+range.  A bounded comparison on two deterministic discovery workloads selected
+the tuple $(0.04,0.20;4,16,35)$ as the lowest-cycle tested adaptive point below
+the predeclared 1\% BD-rate gate.  We then froze its identity and evaluated it
+without retuning on three predeclared held-out synthetic families.
 
-Selection used two deterministic synthetic workloads.  Evaluation then ran
-without retuning on three predeclared held-out synthetic families.  All matched
-curves use HM-16.20 commit
-\texttt{22178e370178133438c0339f57b3b3a29f112909}, Main 8-bit 4:2:0
-All-Intra, four frames, and QP 22/27/32/37.
+The controller deliberately excludes $P$, scheduler state, QP, and activity;
+hardware latency follows only afterward as $\lceil K/P\rceil$ batches.  Thus
+RTL exploration cannot silently alter coding decisions.  All matched curves
+use pinned HM-16.20, Main 8-bit 4:2:0 All-Intra, four frames, and QP
+22/27/32/37.  Section 5 reports both discovery and held-out trade-offs.
 \end{multicols}
 
 \clearpage
 % PAGE 2: complete loop and checked RTL architecture.
 \tightsection{3. End-to-End Co-Design Architecture}
+\begin{multicols}{2}
 \begin{center}
-\begin{tikzpicture}[node distance=5mm and 5mm]
+\begin{tikzpicture}[node distance=3mm and 3mm]
   \node[block,text width=19mm] (proposal) {History-aware\\proposal};
   \node[block,text width=18mm,right=of proposal] (screen) {Analytical\\screen};
   \node[block,text width=18mm,right=of screen] (dispatch) {CHIA/Ray\\dispatch};
-  \node[block,text width=18mm,right=of dispatch] (hm) {Pinned HM\\quality curves};
-  \node[hw,text width=18mm,right=of hm] (rtl) {Verilator\\RTL checks};
-  \node[hw,text width=18mm,right=of rtl] (vivado) {Vivado\\route};
-  \node[result,text width=18mm,right=of vivado] (persist) {Schema + atomic\\persistence};
-  \foreach \a/\b in {proposal/screen,screen/dispatch,dispatch/hm,hm/rtl,rtl/vivado,vivado/persist}
-    \draw[flow] (\a) -- (\b);
-  \draw[feedback] (persist.south) -- ++(0,-5mm) -| node[pos=.48,below,font=\scriptsize,
-    text=orange]{Pareto update, cache, failed-point history} (proposal.south);
-  \node[draw=muted,dashed,rounded corners,fit=(proposal)(screen)(dispatch),inner sep=3pt,
-        label={[font=\scriptsize\color{muted}]above:decision and orchestration}] {};
-  \node[draw=orange,dashed,rounded corners,fit=(hm)(rtl)(vivado),inner sep=3pt,
-        label={[font=\scriptsize\color{orange}]above:evidence-producing tools}] {};
+  \node[block,text width=18mm,below=5mm of dispatch] (hm) {Pinned HM\\quality curves};
+  \node[hw,text width=18mm,left=of hm] (rtl) {Verilator\\RTL checks};
+  \node[hw,text width=18mm,left=of rtl] (vivado) {Vivado\\route};
+  \node[result,text width=20mm,below=5mm of vivado] (persist) {Schema + atomic\\persistence};
+  \draw[flow] (proposal)--(screen); \draw[flow] (screen)--(dispatch);
+  \draw[flow] (dispatch)--(hm); \draw[flow] (hm)--(rtl);
+  \draw[flow] (rtl)--(vivado); \draw[flow] (vivado)--(persist);
+  \draw[feedback] (persist.west) -- ++(-3mm,0) |- (proposal.west);
 \end{tikzpicture}
 \end{center}
 \vspace{-3pt}
 \begin{center}
-\footnotesize\textbf{Figure 1.} Complete \project loop. Dominated and failed
-points remain in history, preventing repeated proposals and turning backend
-failures into the next architecture decision.
+\footnotesize\textbf{Figure 1.} Complete \project loop; persisted Pareto and
+failed-point history guides the next proposal.
 \end{center}
 
-\begin{multicols}{2}
 Native \texttt{ChiaFunction} nodes pass Ray object references asynchronously.
 The deterministic controller consumes completed records, excludes existing
 experiment IDs, and rewards novelty and Pareto-boundary exploration.  The
@@ -192,34 +193,29 @@ the partial final batch.  Up to 16 lanes operate concurrently; each lane is
 internally serial and accepts another candidate only after retirement.
 
 \begin{center}
-\begin{tikzpicture}[node distance=3.0mm]
-  \node[block,text width=25mm] (ctrl) {Frozen Adaptive-$K$\\$K\in\{4,16,35\}$};
-  \node[block,text width=25mm,below=of ctrl] (buf) {Ranked descriptor buffer\\mode, rank, rate bits};
-  \node[block,text width=25mm,below=of buf] (sched) {$P$-way batch scheduler\\$bP+l<K$};
-  \node[hw,text width=25mm,below=of sched] (lanes) {Serial lane $\times P$\\$P\le16$};
-  \node[result,text width=25mm,below=of lanes] (tree) {Balanced min tree\\cost, then stable rank};
+\begin{tikzpicture}[node distance=2.5mm and 2.5mm]
+  \node[block,text width=18mm] (ctrl) {Frozen $K$\\4 / 16 / 35};
+  \node[block,text width=20mm,right=of ctrl] (buf) {Ranked buffer\\mode, rank, bits};
+  \node[block,text width=19mm,right=of buf] (sched) {$P$-way scheduler\\$bP+l<K$};
   \draw[flow] (ctrl)--(buf); \draw[flow] (buf)--(sched);
-  \draw[flow] (sched)--(lanes); \draw[flow] (lanes)--(tree);
 
-  \node[hw,text width=16mm,right=7mm of lanes,yshift=18mm] (pred) {Prediction\\+ residual};
-  \node[hw,text width=15mm,right=of pred] (fwd) {Forward DST\\pass 1/2};
-  \node[hw,text width=15mm,right=of fwd] (quant) {Quantize};
-  \node[hw,text width=15mm,right=of quant] (deq) {Dequantize};
-  \node[hw,text width=15mm,right=of deq] (inv) {Inverse DST\\pass 1/2};
-  \node[hw,text width=16mm,right=of inv] (sse) {Reconstruct\\+ SSE};
-  \node[hw,text width=15mm,right=of sse] (rd) {$D+\lambda R$\\RD cost};
-  \foreach \a/\b in {pred/fwd,fwd/quant,quant/deq,deq/inv,inv/sse,sse/rd}
+  \node[hw,text width=17mm,below=7mm of ctrl] (pred) {Prediction\\+ residual};
+  \node[hw,text width=17mm,right=of pred] (fwd) {Forward DST\\pass 1/2};
+  \node[hw,text width=17mm,right=of fwd] (quant) {Quantize};
+  \node[hw,text width=17mm,below=of quant] (deq) {Dequantize};
+  \node[hw,text width=17mm,left=of deq] (inv) {Inverse DST\\pass 1/2};
+  \node[hw,text width=17mm,left=of inv] (sse) {Reconstruct\\+ SSE};
+  \node[hw,text width=17mm,below=of sse] (rd) {$D+\lambda R$\\RD cost};
+  \node[result,text width=22mm,right=7mm of rd] (tree) {Balanced min tree\\cost, stable rank};
+  \foreach \a/\b in {pred/fwd,fwd/quant,quant/deq,deq/inv,inv/sse,sse/rd,rd/tree}
     \draw[flow] (\a)--(\b);
-  \draw[flow] (lanes.east) -- ++(5mm,0) |- (pred.west);
-  \draw[flow] (rd.south) -- ++(0,-12mm) -| (tree.east);
-  \node[draw=orange,dashed,rounded corners,fit=(pred)(fwd)(quant)(deq)(inv)(sse)(rd),
-        inner sep=3pt,label={[font=\scriptsize\color{orange}]above:one 132-cycle depth-3 candidate lane}] {};
+  \draw[flow] (sched.south) -- ++(0,-3mm) -| (pred.north);
 \end{tikzpicture}
 \end{center}
 \vspace{-4pt}
 \begin{center}
-\footnotesize\textbf{Figure 2.} Implemented RTL hierarchy and lane FSM.  Exact
-HM candidate rate is external; hardware CABAC/context evolution is out of scope.
+\footnotesize\textbf{Figure 2.} Implemented RTL with up to 16 serial 132-cycle
+lanes. Exact HM rate is external; hardware CABAC is out of scope.
 \end{center}
 
 The lane implements planar, DC, and angular modes 0--34; 4$\times$4 8-bit
@@ -417,10 +413,8 @@ ITU-T/ISO/IEC, ``High Efficiency Video Coding Test Model HM-16.20.''
 \texttt{chia-rdo-v1.0.0}.
 \end{thebibliography}
 
-\tightsubsection{AI Assistance Acknowledgement}
-\evidence{The authors used OpenAI OpenCode to assist with code review, artifact
-organization, and manuscript editing. The human authors reviewed the output and
-are responsible for the paper's contents, tone, and quality.}
+\tightsubsection{AI Assistance}
+\evidence{AI assistance was used in preparing this artifact.}
 \end{multicols}
 
 \end{document}
