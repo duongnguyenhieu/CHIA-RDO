@@ -6,7 +6,7 @@ Nguyen Hieu Duong and Duy Hieu Bui<br>
 Vietnam National University<br>
 Contact: [24020497@vnu.edu.vn](mailto:24020497@vnu.edu.vn)
 
-[Paper](https://github.com/duongnguyenhieu/CHIA-RDO/releases/download/chia-rdo-v1.0.0/paper.pdf) |
+[Paper](https://github.com/duongnguyenhieu/CHIA-RDO/paper.pdf) |
 [Release](https://github.com/duongnguyenhieu/CHIA-RDO/releases/tag/chia-rdo-v1.0.0) |
 [Artifact Guide](CHIA-RDO/HACKATHON_ARTIFACT.md) |
 [Source](CHIA-RDO/)
