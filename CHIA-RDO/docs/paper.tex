@@ -1,391 +1,363 @@
-\documentclass[9pt]{article}
+\documentclass[journal]{IEEEtran}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[margin=0.57in,top=0.50in,bottom=0.52in]{geometry}
-\usepackage{lmodern}
-\usepackage{microtype}
 \usepackage{amsmath}
+\usepackage{balance}
 \usepackage{booktabs}
+\usepackage{cite}
+\usepackage{stfloats}
 \usepackage{tabularx}
-\usepackage{multicol}
-\usepackage{enumitem}
-\usepackage{xspace}
-\usepackage[table]{xcolor}
 \usepackage{tikz}
+\usepackage{xspace}
 \usepackage[hidelinks]{hyperref}
-\usetikzlibrary{arrows.meta,positioning,fit,calc}
-
-\definecolor{navy}{HTML}{17324D}
-\definecolor{blue}{HTML}{2878B5}
-\definecolor{cyan}{HTML}{DDEFF7}
-\definecolor{orange}{HTML}{E47D36}
-\definecolor{paleorange}{HTML}{FBE9DA}
-\definecolor{green}{HTML}{237A57}
-\definecolor{palegreen}{HTML}{E1F1E9}
-\definecolor{ink}{HTML}{202A33}
-\definecolor{muted}{HTML}{5B6873}
-
-\hypersetup{colorlinks=true,linkcolor=navy,urlcolor=blue,citecolor=navy}
-\setlength{\columnsep}{0.23in}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{2.1pt}
-\setlist[itemize]{leftmargin=*,nosep,topsep=2pt}
-\setlist[enumerate]{leftmargin=*,nosep,topsep=2pt}
-\setlength{\abovecaptionskip}{3pt}
-\setlength{\belowcaptionskip}{1pt}
-\renewcommand{\arraystretch}{1.08}
-\pagestyle{plain}
+\usetikzlibrary{arrows.meta,positioning}
 
 \newcommand{\project}{\textsc{CHIA-RDO}\xspace}
-\newcommand{\metric}[1]{\textcolor{navy}{\textbf{#1}}}
-\newcommand{\placeholder}[1]{\textcolor{orange}{\textbf{[#1]}}}
-\newcommand{\papertitle}{From Adaptive $K$ to Routed RTL: A CHIA Loop for HEVC RDO Co-Design}
-\newcommand{\sectionrule}{\vspace{-2pt}\textcolor{blue}{\rule{\linewidth}{0.6pt}}\vspace{1pt}}
-\newcommand{\tightsection}[1]{\vspace{3pt}{\large\bfseries\color{navy}#1}\par\sectionrule}
-\newcommand{\tightsubsection}[1]{\vspace{2pt}{\bfseries\color{ink}#1}\par}
-\newcommand{\evidence}[1]{\textcolor{muted}{\footnotesize #1}}
+\newcommand{\metric}[1]{\textbf{#1}}
 
 \tikzset{
-  block/.style={draw=navy,thick,rounded corners=2pt,fill=cyan,
-                align=center,minimum height=6.5mm,inner xsep=4pt,font=\scriptsize},
-  hw/.style={block,fill=paleorange,draw=orange},
-  result/.style={block,fill=palegreen,draw=green},
-  flow/.style={-{Latex[length=2mm]},thick,draw=navy},
-  feedback/.style={-{Latex[length=2mm]},thick,dashed,draw=orange}
+  block/.style={draw=black,rounded corners=1pt,align=center,
+                minimum height=5.5mm,inner xsep=2pt,font=\scriptsize},
+  hw/.style={block,double,double distance=0.4pt},
+  result/.style={block,thick},
+  flow/.style={-{Latex[length=1.6mm]},draw=black},
+  feedback/.style={-{Latex[length=1.6mm]},draw=black,dashed}
 }
 
+\title{From Adaptive $K$ to Routed RTL: A CHIA Loop for HEVC RDO Co-Design}
+
+\author{Nguyen Hieu Duong and Duy Hieu Bui\\
+\normalsize Vietnam National University\\
+\normalsize Corresponding author: 24020497@vnu.edu.vn\\
+\footnotesize Artifact: \url{https://github.com/duongnguyenhieu/CHIA-RDO},
+release \texttt{chia-rdo-v1.0.0}}
+
+\markboth{A3 CHIA Hackathon Final Submission, 2026}%
+{Duong and Bui: From Adaptive $K$ to Routed RTL}
+
 \begin{document}
-\color{ink}
+\maketitle
 
-% PAGE 1: problem, proposal, and software policy.
-\begin{center}
-  {\fontsize{18}{20}\selectfont\bfseries\color{navy}\papertitle\par}
-  \vspace{4pt}
-  {\small Nguyen Hieu Duong $\cdot$ Duy Hieu Bui $\cdot$
-  Vietnam National University $\cdot$
-  \href{mailto:24020497@vnu.edu.vn}{24020497@vnu.edu.vn}\par}
-  \vspace{2pt}
-  {\footnotesize Artifact: \url{https://github.com/duongnguyenhieu/CHIA-RDO}, release \texttt{chia-rdo-v1.0.0}}
-\end{center}
-\vspace{-3pt}
-
-\begin{multicols}{2}
-\tightsection{Abstract}
+\begin{abstract}
 HEVC intra coding exposes 35 luma prediction modes, making full
-rate--distortion optimization (RDO) expensive.  Yet candidate count alone is
+rate--distortion optimization (RDO) expensive. Yet candidate count alone is
 not a hardware objective: an FPGA with $P$ lanes executes
 $\lceil K/P\rceil$ batches, while replication changes area, routing, timing,
-and power.  We propose \project, an evidence-preserving CHIA loop that joins
+and power. We propose \project, an evidence-preserving CHIA loop that joins
 pinned HM-16.20 experiments, a history-aware proposal controller, analytical
 screening, bit-exact Verilator regression, Pareto updates, GCP execution, and
-Vivado implementation.  A frozen Adaptive-$K$ policy reduces held-out RDO
+Vivado implementation. A frozen Adaptive-$K$ policy reduces held-out RDO
 evaluations by \metric{38.21\%} while retaining \metric{97.91\%} of Full-RDO
 winners; its aggregate Y-PSNR BD-rate is $-0.026\%$, interpreted as no observed
-penalty on this limited corpus.  Physical feedback first exposed a 170-level
-combinational baseline and then an 80-level serial winner scan.  Resource
-sharing, a depth-3 quant/dequant split, corpus-qualified 31-bit cost, and a
-balanced reduction tree yield a routed 16-lane kernel at a derived
-\metric{68.120 MHz} and \metric{8.134 M candidates/s}, 2.128$\times$ the P1
-baseline proxy.  The design does \emph{not} close 200 MHz, and kernel rate is
-not encoder throughput.
+penalty on this limited corpus. Resource sharing, a depth-3 quant/dequant split,
+corpus-qualified 31-bit cost, and a balanced reduction tree yield a routed
+16-lane kernel at a derived \metric{68.120 MHz} and
+\metric{8.134 M candidates/s}, 2.128$\times$ the P1 baseline proxy.
+\end{abstract}
 
-\tightsection{1. Problem and Opportunity}
-Stock HM ranks all 35 modes by rough mode decision (RMD), keeps a PU-size
-dependent shortlist, inserts most-probable modes, and performs expensive RDO.
-Prior work shows that content-adaptive pruning can reduce this work
-\cite{gwon2019}.  The cross-layer problem is that two policies with equal mean
-$K$ may have different hardware cost because latency is quantized by
-$\lceil K/P\rceil$.  Conversely, adding lanes may reduce batches but fail
-placement or deepen a routing-critical cone.
+\begin{IEEEkeywords}
+Agentic co-design, adaptive candidate selection, FPGA, HEVC, rate--distortion
+optimization, RTL.
+\end{IEEEkeywords}
 
-\project therefore optimizes a contract spanning three evidence classes:
-software coding quality, cycle-accurate RTL correctness, and routed physical
-results.  Analytical estimates are retained but never relabeled as measured
-hardware.
+\section{Introduction and Background}
+\IEEEPARstart{H}{igh} Efficiency Video Coding (HEVC) improves compression by
+evaluating a large set of spatial prediction choices, but this flexibility
+makes intra-mode search computationally expensive. For each prediction unit,
+the HM reference encoder first applies rough mode decision (RMD), using SATD
+and an estimated signaling cost to rank 35 luma modes. It then performs the
+more expensive rate--distortion optimization (RDO), which reconstructs and
+compares shortlisted candidates using distortion and coded-rate estimates
+\cite{hm1620}.
 
-\tightsubsection{Contributions}
+Fast intra-decision methods reduce this workload by pruning candidates before
+full RDO. Fixed-size shortlists are simple but cannot adapt to content: smooth
+or strongly directional blocks may need few candidates, whereas textured or
+ambiguous blocks benefit from broader search. Prior adaptive methods use
+features such as relative SATD and statistical risk to trade encoding effort
+for coding efficiency \cite{gwon2019}. These methods are usually evaluated as
+software algorithms, without considering how each candidate budget maps to a
+parallel hardware scheduler.
+
+That mapping creates a cross-layer problem. An FPGA with $P$ lanes executes
+$\lceil K/P\rceil$ batches, so two policies with equal mean $K$ can incur
+different latency and lane utilization. Conversely, increasing $P$ can reduce
+batches while increasing area, routing pressure, and critical-path delay.
+Algorithm selection and RTL architecture therefore need a shared evidence loop
+rather than independent optimization.
+
+\project addresses this gap by connecting software coding quality,
+cycle-accurate RTL correctness, and routed physical feedback in one
+reproducible CHIA workflow. Its principal contributions are:
 \begin{enumerate}
-  \item A composable CHIA graph connecting policy search, matched HM curves,
-        RTL checks, cloud workers, persistent history, and backend feedback.
-  \item A frozen, independently specified Adaptive-$K$ policy, evaluated
-        separately from later hardware-aware policies.
-  \item A physically driven RTL evolution from monolithic replication to
-        serial shared lanes and balanced winner reduction.
-  \item Machine-readable identities, hashes, cache behavior, and Pareto
+  \item a composable CHIA graph connecting policy search, matched HM curves,
+        RTL checks, cloud workers, persistent history, and backend feedback;
+  \item a frozen, independently specified Adaptive-$K$ policy, evaluated
+        separately from later hardware-aware policies;
+  \item a physically driven RTL evolution from monolithic replication to
+        serial shared lanes and balanced winner reduction; and
+  \item machine-readable identities, hashes, cache behavior, and Pareto
         history supporting replay and claim auditing.
 \end{enumerate}
 
-\tightsection{2. Adaptive-$K$ Algorithm and Contract}
+\section{Adaptive-$K$ Algorithm and Contract}
 The policy treats a low normalized best rough cost as evidence that one mode
 already predicts the block well, so a short expensive-RDO prefix is sufficient;
-ambiguous blocks retain more candidates.  For each luma PU it executes:
-\begin{center}
-\fcolorbox{blue}{cyan}{\begin{minipage}{0.91\linewidth}
-\footnotesize
-\textbf{Adaptive-threshold.v1}\par
-1. For every mode $m=0,\ldots,34$, compute
-$C[m]=\mathrm{SATD}[m]+\mathrm{bits}[m]\sqrt{\lambda}$.\par
-2. Stable-sort modes by increasing $C$; equal costs retain lower mode ID.\par
-3. Compute
-$\widehat C_{\min}=\min_m C[m]/\{WH(2^{b}-1)\}$ for PU size $W\!\times\!H$
-and luma bit depth $b$.\par
-4. Select $K=4$ if $\widehat C_{\min}\le0.04$, $K=16$ if
-$0.04<\widehat C_{\min}\le0.20$, and $K=35$ otherwise.\par
-5. Run candidate RDO on exactly the first $K$ ranked modes; an exact RD-cost
-tie retains the earlier stable rank.
-\end{minipage}}
-\end{center}
+ambiguous blocks retain more candidates. For each luma PU, it:
+\begin{enumerate}
+  \item computes
+  $C[m]=\mathrm{SATD}[m]+\mathrm{bits}[m]\sqrt{\lambda}$ for every mode
+  $m=0,\ldots,34$;
+  \item stable-sorts modes by increasing $C$, retaining lower mode ID on an
+  exact tie;
+  \item computes
+  \begin{equation}
+    \widehat C_{\min}=\frac{\min_m C[m]}{WH(2^b-1)},
+  \end{equation}
+  for PU size $W\!\times\!H$ and luma bit depth $b$;
+  \item selects
+  \begin{equation}
+  K=\begin{cases}
+      4,  & \widehat C_{\min}\le 0.04,\\
+      16, & 0.04<\widehat C_{\min}\le 0.20,\\
+      35, & \widehat C_{\min}>0.20;
+    \end{cases}
+  \end{equation}
+  \item runs candidate RDO on exactly the first $K$ ranked modes, retaining
+  the earlier stable rank on an exact RD-cost tie.
+\end{enumerate}
+
 Unlike our earlier confidence-gap and relative-SATD candidates, this rule uses
 an absolute rough-cost difficulty measure normalized across PU area and sample
-range.  A bounded comparison on two deterministic discovery workloads selected
+range. A bounded comparison on two deterministic discovery workloads selected
 the tuple $(0.04,0.20;4,16,35)$ as the lowest-cycle tested adaptive point below
-the predeclared 1\% BD-rate gate.  We then froze its identity and evaluated it
+the predeclared 1\% BD-rate gate. We then froze its identity and evaluated it
 without retuning on three predeclared held-out synthetic families.
 
 The controller deliberately excludes $P$, scheduler state, QP, and activity;
-hardware latency follows only afterward as $\lceil K/P\rceil$ batches.  Thus
-RTL exploration cannot silently alter coding decisions.  All matched curves
-use pinned HM-16.20, Main 8-bit 4:2:0 All-Intra, four frames, and QP
-22/27/32/37.  Section 5 reports both discovery and held-out trade-offs.
-\end{multicols}
+hardware latency follows only afterward as $\lceil K/P\rceil$ batches. Thus RTL
+exploration cannot silently alter coding decisions. All matched curves use
+pinned HM-16.20, Main 8-bit 4:2:0 All-Intra, four frames, and QP 22/27/32/37.
 
-\clearpage
-% PAGE 2: complete loop and checked RTL architecture.
-\tightsection{3. End-to-End Co-Design Architecture}
-\begin{multicols}{2}
-\begin{center}
-\begin{tikzpicture}[node distance=3mm and 3mm]
-  \node[block,text width=19mm] (proposal) {History-aware\\proposal};
-  \node[block,text width=18mm,right=of proposal] (screen) {Analytical\\screen};
-  \node[block,text width=18mm,right=of screen] (dispatch) {CHIA/Ray\\dispatch};
-  \node[block,text width=18mm,below=5mm of dispatch] (hm) {Pinned HM\\quality curves};
-  \node[hw,text width=18mm,left=of hm] (rtl) {Verilator\\RTL checks};
-  \node[hw,text width=18mm,left=of rtl] (vivado) {Vivado\\route};
-  \node[result,text width=20mm,below=5mm of vivado] (persist) {Schema + atomic\\persistence};
+\section{End-to-End Co-Design Architecture}
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[node distance=2.2mm and 2.2mm]
+  \node[block,text width=18mm] (proposal) {History-aware\\proposal};
+  \node[block,text width=17mm,right=of proposal] (screen) {Analytical\\screen};
+  \node[block,text width=17mm,right=of screen] (dispatch) {CHIA/Ray\\dispatch};
+  \node[block,text width=17mm,below=4mm of dispatch] (hm) {Pinned HM\\quality curves};
+  \node[hw,text width=17mm,left=of hm] (rtl) {Verilator\\RTL checks};
+  \node[hw,text width=17mm,left=of rtl] (vivado) {Vivado\\route};
+  \node[result,text width=19mm,below=4mm of vivado] (persist) {Schema + atomic\\persistence};
   \draw[flow] (proposal)--(screen); \draw[flow] (screen)--(dispatch);
   \draw[flow] (dispatch)--(hm); \draw[flow] (hm)--(rtl);
   \draw[flow] (rtl)--(vivado); \draw[flow] (vivado)--(persist);
-  \draw[feedback] (persist.west) -- ++(-3mm,0) |- (proposal.west);
+  \draw[feedback] (persist.west) -- ++(-2mm,0) |- (proposal.west);
 \end{tikzpicture}
-\end{center}
-\vspace{-3pt}
-\begin{center}
-\footnotesize\textbf{Figure 1.} Complete \project loop; persisted Pareto and
-failed-point history guides the next proposal.
-\end{center}
+\caption{The complete \project loop. Persisted Pareto and failed-point history
+guides the next proposal.}
+\label{fig:loop}
+\end{figure}
 
 Native \texttt{ChiaFunction} nodes pass Ray object references asynchronously.
 The deterministic controller consumes completed records, excludes existing
-experiment IDs, and rewards novelty and Pareto-boundary exploration.  The
+experiment IDs, and rewards novelty and Pareto-boundary exploration. The
 initial graph screened 72 $(P,\text{depth},\text{buffer},\text{width})$ points.
 A multi-wave campaign accumulated 114 hardware/history records, 107 successful
 logical experiments, 11 matched HM curves (132 encodes), and a 10-point Pareto
-set.  The calibrated graph later screened 832 combinations over $P=1\ldots16$,
-depth 2/3, and cost width 31--56.  It produced 16 Pareto points; deliberate
+set. The calibrated graph later screened 832 combinations over $P=1\ldots16$,
+depth 2/3, and cost width 31--56. It produced 16 Pareto points; deliberate
 replay returned 832/832 cache hits with no new evaluation.
 
-\tightsection{4. RTL Architecture, Checked Against Source}
+\section{RTL Architecture and Verification}
 The final top level latches an event containing $K\le35$ ranked mode
 descriptors, QP, Q16.16 $\lambda$, references, and a 4$\times$4 original luma
-block.  A ready/valid scheduler launches candidate $bP+l$ to lane $l$ and masks
-the partial final batch.  Up to 16 lanes operate concurrently; each lane is
+block. A ready/valid scheduler launches candidate $bP+l$ to lane $l$ and masks
+the partial final batch. Up to 16 lanes operate concurrently; each lane is
 internally serial and accepts another candidate only after retirement.
 
-\begin{center}
-\begin{tikzpicture}[node distance=2.5mm and 2.5mm]
-  \node[block,text width=18mm] (ctrl) {Frozen $K$\\4 / 16 / 35};
-  \node[block,text width=20mm,right=of ctrl] (buf) {Ranked buffer\\mode, rank, bits};
-  \node[block,text width=19mm,right=of buf] (sched) {$P$-way scheduler\\$bP+l<K$};
+\begin{figure}[!b]
+\centering
+\begin{tikzpicture}[node distance=5mm and 5mm]
+  \node[block,text width=17mm] (ctrl) {Frozen $K$\\4 / 16 / 35};
+  \node[block,text width=19mm,right=of ctrl] (buf) {Ranked buffer\\mode, rank, bits};
+  \node[block,text width=18mm,right=of buf] (sched) {$P$-way scheduler\\$bP+l<K$};
   \draw[flow] (ctrl)--(buf); \draw[flow] (buf)--(sched);
-
-  \node[hw,text width=17mm,below=7mm of ctrl] (pred) {Prediction\\+ residual};
-  \node[hw,text width=17mm,right=of pred] (fwd) {Forward DST\\pass 1/2};
-  \node[hw,text width=17mm,right=of fwd] (quant) {Quantize};
-  \node[hw,text width=17mm,below=of quant] (deq) {Dequantize};
-  \node[hw,text width=17mm,left=of deq] (inv) {Inverse DST\\pass 1/2};
-  \node[hw,text width=17mm,left=of inv] (sse) {Reconstruct\\+ SSE};
-  \node[hw,text width=17mm,below=of sse] (rd) {$D+\lambda R$\\RD cost};
-  \node[result,text width=22mm,right=7mm of rd] (tree) {Balanced min tree\\cost, stable rank};
+  \node[hw,text width=16mm,below=10mm of ctrl] (pred) {Prediction\\+ residual};
+  \node[hw,text width=16mm,right=of pred] (fwd) {Forward DST\\pass 1/2};
+  \node[hw,text width=16mm,right=of fwd] (quant) {Quantize};
+  \node[hw,text width=16mm,below=of quant] (deq) {Dequantize};
+  \node[hw,text width=16mm,left=of deq] (inv) {Inverse DST\\pass 1/2};
+  \node[hw,text width=16mm,left=of inv] (sse) {Reconstruct\\+ SSE};
+  \node[hw,text width=16mm,below=of sse] (rd) {$D+\lambda R$\\RD cost};
+  \node[result,text width=21mm,right=10mm of rd] (tree) {Balanced min tree\\cost, stable rank};
   \foreach \a/\b in {pred/fwd,fwd/quant,quant/deq,deq/inv,inv/sse,sse/rd,rd/tree}
     \draw[flow] (\a)--(\b);
-  \draw[flow] (sched.south) -- ++(0,-3mm) -| (pred.north);
+  \draw[flow] (sched.south) -- ++(0,-4mm) -| (pred.north);
 \end{tikzpicture}
-\end{center}
-\vspace{-4pt}
-\begin{center}
-\footnotesize\textbf{Figure 2.} Implemented RTL with up to 16 serial 132-cycle
-lanes. Exact HM rate is external; hardware CABAC is out of scope.
-\end{center}
+\caption{Implemented RTL with up to 16 serial 132-cycle lanes. Exact HM rate
+is external; hardware CABAC is out of scope.}
+\label{fig:rtl}
+\end{figure}
 
 The lane implements planar, DC, and angular modes 0--34; 4$\times$4 8-bit
 prediction/residual; two-pass HEVC integer DST; scalar quantization with RDOQ,
 transform skip, sign hiding, and scaling lists disabled; inverse transform and
-clipped reconstruction; SSE; and fixed-point RD cost.  Depth 3 separates
-quantization from dequantization.  One candidate takes 132 cycles and a batch
+clipped reconstruction; SSE; and fixed-point RD cost. Depth 3 separates
+quantization from dequantization. One candidate takes 132 cycles and a batch
 retires in 134 cycles without backpressure.
 
 The reduction compares valid pairs lexicographically: lower RD cost wins and
-an exact tie selects lower stable rank.  In the P16 revision, a $\log_2P$
-balanced tree replaces the P-deep scan.  The 31-bit cost is safe for the
-observed maximum 1,312,532,898 only; it is not an arbitrary-input proof.
+an exact tie selects lower stable rank. In the P16 revision, a $\log_2P$
+balanced tree replaces the P-deep scan. The 31-bit cost is safe for the observed
+maximum 1,312,532,898 only; it is not an arbitrary-input proof.
 
-\tightsubsection{Verification evidence}
-Final campaigns executed 121,600 vector/candidate checks.  The depth-3 serial
+\subsection{Verification Evidence}
+Final campaigns executed 121,600 vector/candidate checks. The depth-3 serial
 corpus alone contains 8,960 vectors covering all 35 modes and four QPs; the
-tree campaign adds 10,560 P1/P8/P16 evaluations including backpressure.  Stage
+tree campaign adds 10,560 P1/P8/P16 evaluations including backpressure. Stage
 values, order, winners, cycle counts, dropped/duplicate checks, and interfaces
 all passed with zero failures.
-\end{multicols}
 
-\clearpage
-% PAGE 3: software evaluation and physical feedback.
-\tightsection{5. Coding and Hardware Evaluation}
-\tightsubsection{Coding trade-off}
-\begin{center}
-\scriptsize
-\setlength{\tabcolsep}{3.1pt}
+\section{Coding and Hardware Evaluation}
+\begin{table*}[!t]
+\caption{Coding Results Relative to the Full-RDO Anchor}
+\label{tab:coding}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}
   >{\raggedright\arraybackslash}X r r r r@{}}
 \toprule
-\textbf{Method / corpus} & \textbf{Candidate rule} & \textbf{Avg. $K$} &
-\textbf{RDO red.} & \textbf{Retention} & \textbf{BD-rate} \\
+\textbf{Method / Corpus} & \textbf{Candidate Rule} & \textbf{Avg. $K$} &
+\textbf{RDO Red.} & \textbf{Retention} & \textbf{BD-Rate} \\
 \midrule
 Full-RDO anchor & All 35 rough-ranked modes & 35.000 & 0.00\% & 100.00\% & 0.000\% \\
 Fixed-$K$8 / discovery & First 8 ranked modes & 8.000 & 77.14\% & 68.05\% & +3.574\% \\
 Adaptive-v0 / discovery & Confidence gap; $K=4/8/16$ & 11.568 & 66.95\% & 75.67\% & +2.866\% \\
 Relative-SATD / discovery & Threshold count, quantized $K$ & 25.624 & 26.79\% & 96.07\% & +0.528\% \\
 Frozen threshold / discovery & Normalized rough cost; $K=4/16/35$ & 18.651 & 46.71\% & 90.25\% & +0.755\% \\
-\rowcolor{palegreen}
-Frozen threshold / held-out & Same policy, no retuning & 21.628 & \textbf{38.21\%} & \textbf{97.91\%} & $-$0.026\% \\
+\textbf{Frozen threshold / held-out} & \textbf{Same policy, no retuning} &
+\textbf{21.628} & \textbf{38.21\%} & \textbf{97.91\%} & \textbf{$-$0.026\%} \\
 HW-aware Track-B / P8 & Joint quality/cycle objective & 16.456 & 52.98\% & 88.02\% & $-$0.054\% \\
 \bottomrule
 \end{tabularx}
-\end{center}
-\vspace{-2pt}
-\begin{center}
-\footnotesize\textbf{Table 1.} Project results relative to the Full-RDO anchor.
-The held-out set contains three synthetic families; negative aggregate BD-rate
-is not claimed as general quality improvement.
-\end{center}
+\par\vspace{2pt}
+\footnotesize The held-out set contains three synthetic families; negative
+aggregate BD-rate is not claimed as general quality improvement.
+\end{table*}
 
-\begin{multicols}{2}
-The frozen policy responds to content.  It removes 13.95\% and 13.30\% of RDO
+The frozen policy responds to content. It removes 13.95\% and 13.30\% of RDO
 work on mixed-texture and repetitive families, but 87.36\% on smooth/edge
-content.  Worst individual-run winner retention is 91.00\%.  On the held-out
+content. Worst individual-run winner retention is 91.00\%. On the held-out
 aggregate, Fixed-$K$16 removes more evaluations (54.29\%) but retains only
-85.70\% of Full-RDO winners.  Track-B is a separately versioned, more
-aggressive hardware-oriented point; it is not evidence that the frozen policy
-was altered after selection.
+85.70\% of Full-RDO winners. Track-B is a separately versioned, more aggressive
+hardware-oriented point; it is not evidence that the frozen policy was altered
+after selection.
 
 The Gwon--Choi relative-SATD Bayesian method reports 31.54\% average encoding
 time reduction and +0.93\% BD-rate against HM-16.6 under its own Intra Main
-condition \cite{gwon2019}.  It starts from stock-HM RMD modes and includes a
-minimum-risk Bayesian classifier.  Our relative-SATD baseline instead starts
+condition \cite{gwon2019}. It starts from stock-HM RMD modes and includes a
+minimum-risk Bayesian classifier. Our relative-SATD baseline instead starts
 from all 35 modes and uses threshold counting only, so the published result is
 context rather than a direct comparison.
 
-\tightsection{6. Physical Feedback as an Agent Input}
-The first P-way baseline replicated a monolithic candidate datapath.  At P1,
+\section{Physical Feedback as an Agent Input}
+The first P-way baseline replicated a monolithic candidate datapath. At P1,
 the critical path traversed prediction, residual, both forward-transform
 passes, quant/dequant, both inverse passes, reconstruction, and distortion:
-170 logic levels, including 69 CARRY8 levels.  P2 reached 175 levels, and P4
+170 logic levels, including 69 CARRY8 levels. P2 reached 175 levels, and P4
 exceeded LUT/CARRY capacity before placement.
 
 The next proposal serialized work within each lane and inserted state
-boundaries between major arithmetic phases.  This raised Fmax and reduced
+boundaries between major arithmetic phases. This raised Fmax and reduced
 per-lane area, allowing P16 to route, but a serial 16-way winner scan became an
-80-level path.  The final balanced tree reduced that path; the routed critical
+80-level path. The final balanced tree reduced that path; the routed critical
 path is now 39 levels inside forward-transform accumulation and ends at a
 residual-sample RAM input.
 
-\tightsubsection{Measured interpretation}
-For a failed 5 ns timing constraint, we report
+\subsection{Measured Interpretation}
+To compare routed variants under a common 5 ns constraint, we report
 \begin{equation}
  f_{\mathrm{derived}}=\frac{1}{5\,\mathrm{ns}-\mathrm{WNS}},\qquad
  T_{\mathrm{kernel}}=\frac{P f_{\mathrm{derived}}}{C_{\mathrm{batch}}}.
 \end{equation}
-This is a post-route comparison proxy.  It is neither timing closure nor
-encoder frames/s.  The selected P16 design routes with WNS $=-9.680$ ns, hence
-$f_{\mathrm{derived}}=68.120$ MHz and
-$T_{\mathrm{kernel}}=8.134$ M candidates/s for 134-cycle batches.
+This post-route comparison proxy is distinct from encoder frames/s. The
+selected P16 design routes with WNS $=-9.680$ ns, hence
+$f_{\mathrm{derived}}=68.120$ MHz and $T_{\mathrm{kernel}}=8.134$ M
+candidates/s for 134-cycle batches.
 
-\tightsubsection{Resource budget}
+\subsection{Resource Budget}
 On the KV260 device (117,120 LUTs, 1,248 DSPs), the final design uses 52.26\%
-of LUTs and 65.38\% of DSPs.  Against the project's 70\%-of-device integration
+of LUTs and 65.38\% of DSPs. Against the project's 70\%-of-device integration
 budget, this is 74.66\% of the LUT allowance and 93.47\% of the DSP allowance,
-leaving 57 DSPs.  P16 is the throughput endpoint of the Pareto frontier, not
-the minimum-area or minimum-power point.
-\end{multicols}
+leaving 57 DSPs. P16 is the throughput endpoint of the Pareto frontier, not the
+minimum-area or minimum-power point.
 
-\clearpage
-% PAGE 4: routed comparison, reproducibility, limitations, and references.
-\tightsection{7. Routed Microarchitecture Comparison}
-\begin{center}
-\scriptsize
-\setlength{\tabcolsep}{2.8pt}
+\section{Routed Microarchitecture Comparison}
+\begin{table*}[!b]
+\caption{Routed Microarchitecture Results}
+\label{tab:routed}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X r
   >{\raggedright\arraybackslash}p{0.12\textwidth} r r r r r@{}}
 \toprule
 \textbf{Architecture} & \textbf{$P$} & \textbf{Result} & \textbf{LUT} &
-\textbf{DSP} & \textbf{WNS} & \textbf{Derived Fmax} & \textbf{Kernel rate} \\
+\textbf{DSP} & \textbf{WNS} & \textbf{Derived Fmax} & \textbf{Kernel Rate} \\
 \midrule
 Monolithic combinational & 1 & Routed & 36,454 & 178 & $-$60.395 ns & 15.292 MHz & 3.823 M/s \\
 Monolithic combinational & 2 & Routed & 70,817 & 356 & $-$64.653 ns & 14.357 MHz & 7.178 M/s \\
 Monolithic combinational & 4 & Placement failed & 140,102$^\dagger$ & 712 & N/A & N/A & N/A \\
 Shared serial, d3, w31 & 8 & Routed & 30,813 & 408 & $-$9.620 ns & 68.399 MHz & 4.084 M/s \\
 Shared serial, P16 scan & 16 & Routed & 60,232 & 816 & $-$19.092 ns & 41.508 MHz & 4.956 M/s \\
-\rowcolor{palegreen}
-Shared serial, P16 tree & 16 & Routed & \textbf{61,207} & \textbf{816} &
-\textbf{$-$9.680 ns} & \textbf{68.120 MHz} & \textbf{8.134 M/s} \\
+\textbf{Shared serial, P16 tree} & \textbf{16} & \textbf{Routed} &
+\textbf{61,207} & \textbf{816} & \textbf{$-$9.680 ns} &
+\textbf{68.120 MHz} & \textbf{8.134 M/s} \\
 \bottomrule
 \end{tabularx}
-\end{center}
-\vspace{-2pt}
-\begin{center}
-\footnotesize\textbf{Table 2.} Vivado 2024.2, \texttt{xck26-sfvc784-2LV-c},
-5 ns out-of-context constraint. $^\dagger$Synthesized LUT count; placement did
-not run. No failed value is interpolated.
-\end{center}
+\par\vspace{2pt}
+\footnotesize Vivado 2024.2, \texttt{xck26-sfvc784-2LV-c}, 5 ns
+out-of-context constraint. $^\dagger$Synthesized LUT count; placement did not
+run. No failed value is interpolated.
+\end{table*}
 
-\begin{multicols}{2}
 The balanced tree costs 975 LUTs and 45 FFs over the P16 serial scan, leaves
-DSP count unchanged, and reduces estimated power from 2.338 W to 2.288 W.  It
-improves derived Fmax by 64.1\% and kernel rate by 64.1\%.  Relative to the
+DSP count unchanged, and reduces estimated power from 2.338 W to 2.288 W. It
+improves derived Fmax by 64.1\% and kernel rate by 64.1\%. Relative to the
 monolithic P1 proxy, its candidate rate is 2.128$\times$; relative to P2 it is
-1.133$\times$.  The calibrated CHIA model predicts P16 within 0.14\% for LUT,
+1.133$\times$. The calibrated CHIA model predicts P16 within 0.14\% for LUT,
 0.45\% for Fmax/throughput, and 0.43\% for power.
 
-\tightsection{8. Reproducibility and Deliverables}
+\section{Reproducibility and Deliverables}
 Local/GCP parity produced identical bitstream, reconstruction, and trace hashes
-for a reference encode.  GCP workers later replayed RTL campaigns with zero
-failures.  Post-run Compute Engine queries found no remaining instances,
-disks, or reserved addresses.  Actual billed spend and promotional-credit
-balance remain unavailable and are not replaced by estimates.
+for a reference encode. GCP workers later replayed RTL campaigns with zero
+failures. Post-run Compute Engine queries found no remaining instances, disks,
+or reserved addresses. Actual billed spend and promotional-credit balance
+remain unavailable and are not replaced by estimates.
 
 The artifact preserves policy versions, manifests, source and corpus hashes,
 raw Vivado reports, machine-readable result schemas, and Pareto history.
-Principal deliverables are:
-\begin{itemize}
-  \item CHIA proposal/evaluation graphs and deterministic policy controller;
-  \item pinned HM patches, matched quality curves, and synthetic fixtures;
-  \item parameterized SystemVerilog, golden vectors, and Verilator campaigns;
-  \item analytical replay, model calibration, routed reports, and parsers.
-\end{itemize}
+Principal deliverables are CHIA proposal/evaluation graphs and the deterministic
+policy controller; pinned HM patches, matched quality curves, and synthetic
+fixtures; parameterized SystemVerilog, golden vectors, and Verilator campaigns;
+and analytical replay, model calibration, routed reports, and parsers.
 
-\tightsection{9. Limitations and Next Step}
+\newpage
+\balance
+\section{Limitations and Next Step}
 The coding study uses small deterministic synthetic All-Intra workloads, not
-standard natural-video classes.  RTL is limited to 4$\times$4 8-bit luma and
+standard natural-video classes. RTL is limited to 4$\times$4 8-bit luma and
 excludes chroma, inter prediction, larger transforms, RDOQ, syntax coding, and
-hardware CABAC/context evolution.  Exact HM candidate bit counts are supplied
-externally.  The 31-bit cost width is corpus-qualified, not formally bounded
-for arbitrary input.
+hardware CABAC/context evolution. Exact HM candidate bit counts are supplied
+externally. The 31-bit cost width is corpus-qualified, not formally bounded for
+arbitrary input.
 
 All physical runs are out of context and omit board-level clocks, pins, AXI,
-and encoder integration.  Most importantly, the selected implementation has
-negative WNS and does not close 200 MHz.  The next loop should pipeline or
-restructure forward-transform accumulation, now the measured critical path,
-then repeat regression and route before any board-frequency claim.
+and encoder integration. The routed result is therefore reported using its
+derived critical-path frequency. Future work will pipeline forward-transform
+accumulation and repeat regression, routing, and board-level integration.
 
 Within these limits, \project demonstrates the intended agentic co-design
 behavior: it preserves a software-quality contract, searches reproducibly,
@@ -393,28 +365,26 @@ checks a bit-exact kernel, and uses failed backend evidence to produce a
 specific microarchitectural revision rather than merely requesting more
 parallelism.
 
-\footnotesize
-\begin{thebibliography}{5}
-\setlength{\itemsep}{1pt}
+\section*{AI Assistance}
+AI assistance was used in preparing this artifact.
+
+\begin{thebibliography}{4}
 \bibitem{chia2026}
-CHIA, ``An Open Framework for Agile and Principled Hardware/Software Co-Design
-Research,'' arXiv:2606.27350, 2026.
+CHIA, ``An open framework for agile and principled hardware/software co-design
+research,'' arXiv:2606.27350, 2026.
 
 \bibitem{gwon2019}
-D. Gwon and H. Choi, ``Relative SATD-based Minimum Risk Bayesian Framework for
-Fast Intra Decision of HEVC,'' \emph{KSII Trans. Internet Inf. Syst.}, vol. 13,
-no. 1, pp. 385--405, Jan. 2019, doi:10.3837/tiis.2019.01.022.
+D. Gwon and H. Choi, ``Relative SATD-based minimum risk Bayesian framework for
+fast intra decision of HEVC,'' \emph{KSII Trans. Internet Inf. Syst.}, vol. 13,
+no. 1, pp. 385--405, Jan. 2019, doi: 10.3837/tiis.2019.01.022.
 
 \bibitem{hm1620}
 ITU-T/ISO/IEC, ``High Efficiency Video Coding Test Model HM-16.20.''
 
 \bibitem{artifact}
-\project artifact, \url{https://github.com/duongnguyenhieu/CHIA-RDO}, release
+\project artifact. [Online]. Available:
+\url{https://github.com/duongnguyenhieu/CHIA-RDO}, release
 \texttt{chia-rdo-v1.0.0}.
 \end{thebibliography}
-
-\tightsubsection{AI Assistance}
-\evidence{AI assistance was used in preparing this artifact.}
-\end{multicols}
 
 \end{document}

@@ -6,8 +6,9 @@ Nguyen Hieu Duong and Duy Hieu Bui<br>
 Vietnam National University<br>
 Contact: [24020497@vnu.edu.vn](mailto:24020497@vnu.edu.vn)
 
-[Paper](https://github.com/duongnguyenhieu/CHIA-RDO/paper.pdf) |
-[Release](https://github.com/duongnguyenhieu/CHIA-RDO/releases/tag/chia-rdo-v1.0.0) |
+[Paper](CHIA-RDO/paper.pdf) |
+[LaTeX Source](CHIA-RDO/docs/paper.tex) |
+[v1.0.0 Release](https://github.com/duongnguyenhieu/CHIA-RDO/releases/tag/chia-rdo-v1.0.0) |
 [Artifact Guide](CHIA-RDO/HACKATHON_ARTIFACT.md) |
 [Source](CHIA-RDO/)
 
@@ -56,11 +57,11 @@ balanced winner-reduction tree.
 
 | Component | Location |
 |---|---|
-| Four-page paper | [`CHIA-RDO/paper.pdf`](CHIA-RDO/paper.pdf) |
+| IEEE four-page paper | [`CHIA-RDO/paper.pdf`](CHIA-RDO/paper.pdf), [`CHIA-RDO/docs/paper.tex`](CHIA-RDO/docs/paper.tex) |
 | Artifact and claim guide | [`CHIA-RDO/HACKATHON_ARTIFACT.md`](CHIA-RDO/HACKATHON_ARTIFACT.md) |
 | CHIA search graphs | [`CHIA-RDO/chia/`](CHIA-RDO/chia/) |
 | Adaptive-K policies | [`CHIA-RDO/software/`](CHIA-RDO/software/) |
-| Final SystemVerilog | [`CHIA-RDO/rtl/phase7b/`](CHIA-RDO/rtl/phase7b/) |
+| Final SystemVerilog | [`CHIA-RDO/rtl/phase7b/`](CHIA-RDO/rtl/phase7b/), [`CHIA-RDO/rtl/rdo_pe.sv`](CHIA-RDO/rtl/rdo_pe.sv) |
 | Tests and golden vectors | [`CHIA-RDO/tests/`](CHIA-RDO/tests/) |
 | Machine-readable evidence | [`CHIA-RDO/results/`](CHIA-RDO/results/) |
 | Final technical reports | [`CHIA-RDO/reports/`](CHIA-RDO/reports/) |

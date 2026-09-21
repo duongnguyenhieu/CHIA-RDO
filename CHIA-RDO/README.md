@@ -14,7 +14,8 @@ baseline. This is a kernel proxy, not encoder FPS, and the design does not meet
 the 200 MHz timing constraint.
 
 Start with the [artifact guide](HACKATHON_ARTIFACT.md), the
-[four-page paper](paper.pdf), and the
+[four-page paper](paper.pdf), its
+[IEEE LaTeX source](docs/paper.tex), and the
 [final algorithm specification](docs/final_algorithm_spec.md).
 
 ## Quick Start
@@ -53,7 +54,7 @@ published JSON and text reports can be inspected without a Vivado license.
 | CHIA search graphs | `chia/phase6_graph.py`, `chia/phase7b_graph.py` |
 | Proposal controller | `chia/phase6_agent.py` |
 | Adaptive-K policies | `software/policy_algorithms.py`, `software/run_policy.py` |
-| Final RTL | `rtl/phase7b/` |
+| Final RTL | `rtl/phase7b/`, plus shared RD-cost PE `rtl/rdo_pe.sv` |
 | Golden vectors and tests | `tests/full_rdo/`, `tests/test_phase6.py` |
 | Published evidence | `results/phase4/`, `results/phase7/`, `results/phase7b/` |
 | Final reports | `reports/phase7b_*.md` |
