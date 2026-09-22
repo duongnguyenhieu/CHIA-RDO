@@ -170,47 +170,105 @@ depth 2/3, and cost width 31--56. It produced 16 Pareto points; deliberate
 replay returned 832/832 cache hits with no new evaluation.
 
 \section{RTL Architecture and Verification}
-The final top level latches an event containing $K\le35$ ranked mode
-descriptors, QP, Q16.16 $\lambda$, references, and a 4$\times$4 original luma
-block. A ready/valid scheduler launches candidate $bP+l$ to lane $l$ and masks
-the partial final batch. Up to 16 lanes operate concurrently; each lane is
-internally serial and accepts another candidate only after retirement.
+The hardware/software boundary is explicit. HM software evaluates rough costs
+for all 35 modes, creates the stable ranking, applies Adaptive-$K$, obtains each
+candidate's integer HM bit count, quantizes $\lambda$ to Q16.16, and packages
+the event. Adaptive-$K$, rough ranking, and CABAC-context bit estimation are
+therefore not implemented in RTL.
+
+A start transaction supplies $K$; up to 35 ranked 6-bit modes and aligned
+24-bit rate counts; 6-bit QP; 32-bit $\lambda$; seventeen 8-bit top/left
+references; and the row-major 4$\times$4 8-bit original luma block. The final
+\texttt{full\_rdo\_pway\_optimized} elaboration uses $P=16$, depth 3, and a
+31-bit cost. Its ready/valid scheduler dispatches candidate $bP+l$ to lane $l$
+and masks the partial final batch.
 
 \begin{figure}[!b]
 \centering
-\begin{tikzpicture}[node distance=5mm and 5mm]
-  \node[block,text width=17mm] (ctrl) {Frozen $K$\\4 / 16 / 35};
-  \node[block,text width=19mm,right=of ctrl] (buf) {Ranked buffer\\mode, rank, bits};
-  \node[block,text width=18mm,right=of buf] (sched) {$P$-way scheduler\\$bP+l<K$};
-  \draw[flow] (ctrl)--(buf); \draw[flow] (buf)--(sched);
-  \node[hw,text width=16mm,below=10mm of ctrl] (pred) {Prediction\\+ residual};
-  \node[hw,text width=16mm,right=of pred] (fwd) {Forward DST\\pass 1/2};
-  \node[hw,text width=16mm,right=of fwd] (quant) {Quantize};
-  \node[hw,text width=16mm,below=of quant] (deq) {Dequantize};
-  \node[hw,text width=16mm,left=of deq] (inv) {Inverse DST\\pass 1/2};
-  \node[hw,text width=16mm,left=of inv] (sse) {Reconstruct\\+ SSE};
-  \node[hw,text width=16mm,below=of sse] (rd) {$D+\lambda R$\\RD cost};
-  \node[result,text width=21mm,right=10mm of rd] (tree) {Balanced min tree\\cost, stable rank};
-  \foreach \a/\b in {pred/fwd,fwd/quant,quant/deq,deq/inv,inv/sse,sse/rd,rd/tree}
+\begin{tikzpicture}[node distance=3mm]
+  \node[block,text width=67mm] (sw) {\textbf{Software / HM-16.20}\\
+    35-mode RMD + stable rank $\rightarrow$ Adaptive-$K$\\
+    exact rate bits + $\lambda_{\mathrm{Q16.16}}$};
+  \node[font=\tiny,below=1.5mm of sw] (boundary) {hardware/software boundary};
+  \draw[dashed] ([xshift=-31mm]boundary.center)--([xshift=-12mm]boundary.center);
+  \draw[dashed] ([xshift=12mm]boundary.center)--([xshift=31mm]boundary.center);
+  \node[block,text width=67mm,below=2mm of boundary] (event) {\textbf{RTL event input}\\
+    $K$, ranked modes/rates, QP, $\lambda$, refs[17], original[4$\times$4]};
+  \node[block,text width=67mm,below=of event] (sched)
+    {\texttt{full\_rdo\_pway\_optimized}: event registers + P16 batch FSM};
+  \node[hw,text width=67mm,below=of sched] (lanes)
+    {\texttt{full\_rdo\_mvp\_4x4\_serial[0:15]}\\
+    predict/residual $\rightarrow$ F-DST $\rightarrow$ quant/dequant $\rightarrow$ I-DST\\
+    reconstruct/SSE $\rightarrow$ \texttt{rdo\_pe}: $(D\ll16)+\lambda R$};
+  \node[result,text width=67mm,below=of lanes] (tree)
+    {16-input balanced min tree: compare (cost, stable rank)};
+  \node[block,text width=67mm,below=of tree] (outputs) {\textbf{RTL outputs}\\
+    retire[16] rank/mode/cost; done + winner; cycle/batch/stall counters};
+  \foreach \a/\b in {sw/event,event/sched,sched/lanes,lanes/tree,tree/outputs}
     \draw[flow] (\a)--(\b);
-  \draw[flow] (sched.south) -- ++(0,-4mm) -| (pred.north);
 \end{tikzpicture}
-\caption{Implemented RTL with up to 16 serial 132-cycle lanes. Exact HM rate
-is external; hardware CABAC is out of scope.}
+\caption{Software/HM partition and the selected RTL hierarchy. Each of the 16
+lanes is internally serial and takes 132 cycles per candidate.}
 \label{fig:rtl}
 \end{figure}
 
-The lane implements planar, DC, and angular modes 0--34; 4$\times$4 8-bit
-prediction/residual; two-pass HEVC integer DST; scalar quantization with RDOQ,
-transform skip, sign hiding, and scaling lists disabled; inverse transform and
-clipped reconstruction; SSE; and fixed-point RD cost. Depth 3 separates
-quantization from dequantization. One candidate takes 132 cycles and a batch
-retires in 134 cycles without backpressure.
+Hardware performs 4$\times$4 luma prediction, residual, two-pass integer DST,
+scalar quant/dequant, inverse DST, reconstruction, SSE distortion, fixed-point
+RD cost, and stable winner reduction. Per-lane retirement exposes accepted
+rank, mode, support, and cost; completion returns winner rank/mode/cost plus
+cycle, batch, stall, and lane-activity counters. Lower cost wins, with stable
+rank breaking exact ties. A batch retires in 134 cycles without backpressure.
 
-The reduction compares valid pairs lexicographically: lower RD cost wins and
-an exact tie selects lower stable rank. In the P16 revision, a $\log_2P$
-balanced tree replaces the P-deep scan. The 31-bit cost is safe for the observed
-maximum 1,312,532,898 only; it is not an arbitrary-input proof.
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[
+  node distance=4mm and 2.2mm,
+  lane/.style={block,text width=15.2mm,minimum height=8mm,font=\tiny},
+  datum/.style={font=\tiny,align=center},
+  control/.style={block,dashed,text width=24mm,minimum height=6mm,font=\tiny},
+  tinyflow/.style={-{Latex[length=1.2mm]},draw=black}
+]
+  \node[lane] (pred) {Intra\\predictor};
+  \node[lane,right=of pred] (res) {Residual\\$O-P$};
+  \node[lane,right=of res] (fdst) {Shared 4-tap\\F-DST $\times2$};
+  \node[lane,right=of fdst] (quant) {Quantize /\\dequantize};
+  \node[lane,below=of quant] (idst) {Shared 4-tap\\I-DST $\times2$};
+  \node[lane,below=of pred] (recon) {Reconstruct\\clip$(P+r_{\mathrm{inv}})$};
+  \node[lane,below=of recon] (sse) {SSE vs. $O$\\$D=\sum(O-\hat O)^2$};
+  \node[lane,right=of sse] (rd) {\texttt{rdo\_pe}\\$(D\ll16)+\lambda R$};
+
+  \draw[tinyflow] (pred)--(res);
+  \draw[tinyflow] (res)--(fdst);
+  \draw[tinyflow] (fdst)--(quant);
+  \draw[tinyflow] (quant)--(idst);
+  \draw[tinyflow] (idst.west)--node[datum,above] {inverse residual $r_{\mathrm{inv}}$}
+    (recon.east);
+  \draw[tinyflow] (pred)--node[datum,right] {$P$} (recon);
+  \draw[tinyflow] (recon)--(sse);
+  \draw[tinyflow] (sse)--(rd);
+
+  \node[datum,above=2mm of pred] (refs) {mode + refs[17]};
+  \node[datum,above=2mm of res] (orig) {original[16]};
+  \node[datum,above=2mm of quant] (qp) {QP constants};
+  \node[datum,below=2mm of rd] (rate) {$R$ + $\lambda_{\mathrm{Q16.16}}$};
+  \node[datum,right=2mm of rd] (cost) {mode +\\RD cost};
+  \draw[tinyflow] (refs)--(pred);
+  \draw[tinyflow] (orig)--(res);
+  \draw[tinyflow] (qp)--(quant);
+  \draw[tinyflow] (rate)--(rd);
+  \draw[tinyflow] (rd)--(cost);
+
+  \node[control,below=of idst] (fsm)
+    {Lane FSM\\phase + sample index};
+  \draw[tinyflow,dashed] (fsm)--node[datum,right] {control} (idst);
+\end{tikzpicture}
+\caption{Datapath inside one serial RTL lane. Registers between FSM phases
+store the sixteen intermediate samples; the same arithmetic resources are
+reused across positions. The FSM advances the ordered phases one sample or
+coefficient per cycle. Sixteen identical lanes feed the reduction tree in
+Fig.~\ref{fig:rtl}.}
+\label{fig:lane}
+\end{figure}
 
 \subsection{Verification Evidence}
 Final campaigns executed 121,600 vector/candidate checks. The depth-3 serial
@@ -273,8 +331,8 @@ The next proposal serialized work within each lane and inserted state
 boundaries between major arithmetic phases. This raised Fmax and reduced
 per-lane area, allowing P16 to route, but a serial 16-way winner scan became an
 80-level path. The final balanced tree reduced that path; the routed critical
-path is now 39 levels inside forward-transform accumulation and ends at a
-residual-sample RAM input.
+path is now 39 levels inside one lane's prediction/residual datapath and ends
+at a residual-sample RAM input.
 
 \subsection{Measured Interpretation}
 To compare routed variants under a common 5 ns constraint, we report
@@ -295,33 +353,29 @@ leaving 57 DSPs. P16 is the throughput endpoint of the Pareto frontier, not the
 minimum-area or minimum-power point.
 
 \section{Routed Microarchitecture Comparison}
-\begin{table*}[!b]
-\caption{Routed Microarchitecture Results}
+\begin{table}[!b]
+\caption{Routed Implementations}
 \label{tab:routed}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X r
-  >{\raggedright\arraybackslash}p{0.12\textwidth} r r r r r@{}}
+\scriptsize
+\setlength{\tabcolsep}{1.8pt}
+\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}X r r r r r@{}}
 \toprule
-\textbf{Architecture} & \textbf{$P$} & \textbf{Result} & \textbf{LUT} &
-\textbf{DSP} & \textbf{WNS} & \textbf{Derived Fmax} & \textbf{Kernel Rate} \\
+\textbf{Architecture} & \textbf{$P$} & \textbf{LUT/DSP} & \textbf{WNS} &
+\textbf{MHz} & \textbf{M/s} \\
 \midrule
-Monolithic combinational & 1 & Routed & 36,454 & 178 & $-$60.395 ns & 15.292 MHz & 3.823 M/s \\
-Monolithic combinational & 2 & Routed & 70,817 & 356 & $-$64.653 ns & 14.357 MHz & 7.178 M/s \\
-Monolithic combinational & 4 & Placement failed & 140,102$^\dagger$ & 712 & N/A & N/A & N/A \\
-Shared serial, d3, w31 & 8 & Routed & 30,813 & 408 & $-$9.620 ns & 68.399 MHz & 4.084 M/s \\
-Shared serial, P16 scan & 16 & Routed & 60,232 & 816 & $-$19.092 ns & 41.508 MHz & 4.956 M/s \\
-\textbf{Shared serial, P16 tree} & \textbf{16} & \textbf{Routed} &
-\textbf{61,207} & \textbf{816} & \textbf{$-$9.680 ns} &
-\textbf{68.120 MHz} & \textbf{8.134 M/s} \\
+Mono. combinational & 1 & 36,454/178 & $-$60.395 & 15.292 & 3.823 \\
+Mono. combinational & 2 & 70,817/356 & $-$64.653 & 14.357 & 7.178 \\
+Serial d3, w31 & 8 & 30,813/408 & $-$9.620 & 68.399 & 4.084 \\
+Serial P16 scan & 16 & 60,232/816 & $-$19.092 & 41.508 & 4.956 \\
+\textbf{Serial P16 tree} & \textbf{16} & \textbf{61,207/816} &
+\textbf{$-$9.680} & \textbf{68.120} & \textbf{8.134} \\
 \bottomrule
 \end{tabularx}
-\par\vspace{2pt}
-\footnotesize Vivado 2024.2, \texttt{xck26-sfvc784-2LV-c}, 5 ns
-out-of-context constraint. $^\dagger$Synthesized LUT count; placement did not
-run. No failed value is interpolated.
-\end{table*}
+\par\vspace{1pt}
+\scriptsize All rows routed. WNS is in ns; MHz is derived from the routed
+critical path; M/s is the candidate-kernel rate.
+\end{table}
 
 The balanced tree costs 975 LUTs and 45 FFs over the P16 serial scan, leaves
 DSP count unchanged, and reduces estimated power from 2.338 W to 2.288 W. It
@@ -344,7 +398,6 @@ policy controller; pinned HM patches, matched quality curves, and synthetic
 fixtures; parameterized SystemVerilog, golden vectors, and Verilator campaigns;
 and analytical replay, model calibration, routed reports, and parsers.
 
-\newpage
 \balance
 \section{Limitations and Next Step}
 The coding study uses small deterministic synthetic All-Intra workloads, not
@@ -353,6 +406,16 @@ excludes chroma, inter prediction, larger transforms, RDOQ, syntax coding, and
 hardware CABAC/context evolution. Exact HM candidate bit counts are supplied
 externally. The 31-bit cost width is corpus-qualified, not formally bounded for
 arbitrary input.
+
+Resource scale is also a limitation. The selected design uses 816 DSP48E2
+primitives, exactly 51 per lane times 16 lanes. ``Serial'' describes candidate
+execution within a lane; it does not imply one shared multiplier. Runtime
+products in prediction, quant/dequant, squared error, and the 24$\times$32-bit
+$\lambda R$ term infer multiple DSP slices, and the RTL does not explicitly
+share these multipliers across lanes. The P16 scan already uses 60,232 LUTs;
+the balanced tree adds 975 LUTs and 45 FFs but no DSPs, producing the
+61,207-LUT total. A final hierarchical utilization split by operation was not
+preserved, so finer DSP attribution would require a new synthesis report.
 
 All physical runs are out of context and omit board-level clocks, pins, AXI,
 and encoder integration. The routed result is therefore reported using its
@@ -364,9 +427,6 @@ behavior: it preserves a software-quality contract, searches reproducibly,
 checks a bit-exact kernel, and uses failed backend evidence to produce a
 specific microarchitectural revision rather than merely requesting more
 parallelism.
-
-\section*{AI Assistance}
-AI assistance was used in preparing this artifact.
 
 \begin{thebibliography}{4}
 \bibitem{chia2026}
