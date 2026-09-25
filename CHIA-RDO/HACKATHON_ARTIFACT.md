@@ -2,7 +2,7 @@
 
 ## Scope
 
-This artifact accompanies the paper “From Adaptive K to Routed RTL: A CHIA Loop for HEVC RDO Co-Design.” It contains the Adaptive-K policy implementations, CHIA loops, pinned experiment outputs, Verilator regressions, Vivado report parsers, and final result summaries.
+This artifact accompanies the paper “From HM-Side Adaptive K to Variable-K RTL: A CHIA Loop for HEVC RDO Co-Design.” It contains the Adaptive-K policy implementations, CHIA loops, pinned experiment outputs, Verilator regressions, Vivado report parsers, and final result summaries.
 
 The primary claim is a traceable co-design result: a routed P16 depth-3 width-31 balanced-tree Full-RDO kernel reaches a derived 8.134 million candidates/s throughput proxy, 2.128x the routed P1 baseline, while remaining under the internal 70%-of-device resource budget. This is not encoder FPS, board performance, or 200 MHz timing closure.
 

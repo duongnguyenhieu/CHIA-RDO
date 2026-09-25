@@ -1,6 +1,6 @@
 # CHIA-RDO
 
-**From Adaptive K to Routed RTL: A CHIA Loop for HEVC RDO Co-Design**
+**From HM-Side Adaptive K to Variable-K RTL: A CHIA Loop for HEVC RDO Co-Design**
 
 Nguyen Hieu Duong and Duy Hieu Bui<br>
 Vietnam National University<br>
